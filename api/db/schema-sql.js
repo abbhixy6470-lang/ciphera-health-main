@@ -2,6 +2,13 @@
 // apply / ensure the schema idempotently on first run.
 
 export const SCHEMA_UP = `
+CREATE TABLE IF NOT EXISTS app_users (
+  id            TEXT PRIMARY KEY,
+  email         TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at    BIGINT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS caregivers (
   id           TEXT PRIMARY KEY,
   email        TEXT UNIQUE NOT NULL,
@@ -76,6 +83,23 @@ CREATE TABLE IF NOT EXISTS doctor_history (
   ts          BIGINT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_doctor_history_owner ON doctor_history (owner_key);
+
+CREATE TABLE IF NOT EXISTS medical_records (
+  id          TEXT PRIMARY KEY,
+  owner_key   TEXT NOT NULL,
+  title       TEXT NOT NULL,
+  type        TEXT DEFAULT 'Report',
+  record_date TEXT DEFAULT '',
+  patient_id  TEXT DEFAULT '',
+  facility    TEXT DEFAULT '',
+  doctor      TEXT DEFAULT '',
+  result_summary TEXT DEFAULT '',
+  notes       TEXT DEFAULT '',
+  fields      JSONB DEFAULT '[]'::jsonb,
+  created_at  BIGINT NOT NULL,
+  updated_at  BIGINT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_medical_records_owner ON medical_records (owner_key);
 `;
 
 let ensuring = false;

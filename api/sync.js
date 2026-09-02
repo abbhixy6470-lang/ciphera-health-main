@@ -8,21 +8,23 @@
 // from the device, so no heavy account ceremony is required for patients.
 
 import { query } from '../db/client.js';
-import { corsHeaders, sendOptions, ok, err, uid, now } from '../db/helpers.js';
+import { corsHeaders, sendOptions, ok, err, uid, now, verifyToken } from '../db/helpers.js';
 
-function deviceKey(req) {
+// The owner_key is the authenticated app user's id (from the session token),
+// so each account's data is fully isolated.
+function authedOwnerKey(req) {
   const auth = req.headers['authorization'] || '';
-  if (auth.startsWith('Bearer ')) return auth.slice(7).trim();
-  const u = new URL(req.url, 'http://x');
-  return u.searchParams.get('key') || '';
+  if (!auth.startsWith('Bearer ')) return null;
+  const payload = verifyToken(auth.slice(7).trim());
+  return payload && payload.sub ? payload.sub : null;
 }
 
 export default async function handler(req, res) {
   for (const [k, v] of Object.entries(corsHeaders())) res.setHeader(k, v);
   if (req.method === 'OPTIONS') return sendOptions(res);
 
-  const key = deviceKey(req);
-  if (!key) return err(res, 'Missing device key (Authorization: Bearer <key> or ?key=)', 401);
+  const key = authedOwnerKey(req);
+  if (!key) return err(res, 'Not authenticated. Missing or invalid session token.', 401);
 
   try {
     if (req.method === 'GET') {
@@ -65,7 +67,12 @@ async function loadBundle(key) {
   let settings = {};
   for (const row of settingsRs.rows) settings[row.key] = row.value;
   const history = (await query('SELECT * FROM doctor_history WHERE owner_key = $1 ORDER BY ts DESC LIMIT 500', [key])).rows.map(r => ({ id: r.id, ...pick(r, HIS), warnings: r.warnings }));
-  return { key, patients, medicines, logs, settings, doctorHistory: history };
+  const records = (await query('SELECT * FROM medical_records WHERE owner_key = $1 ORDER BY created_at DESC', [key])).rows.map(r => ({
+    id: r.id, title: r.title, type: r.type, recordDate: r.record_date, patientId: r.patient_id,
+    facility: r.facility, doctor: r.doctor, resultSummary: r.result_summary, notes: r.notes,
+    fields: r.fields, createdAt: r.created_at, updatedAt: r.updated_at
+  }));
+  return { key, patients, medicines, logs, settings, doctorHistory: history, records };
 }
 
 function pick(row, fields) {
@@ -131,6 +138,19 @@ async function saveBundle(key, body) {
        VALUES ($1,$2,$3,$4,$5::jsonb,$6)`,
       [h.id || uid('q'), key, h.question, h.answer || '',
        JSON.stringify(Array.isArray(h.warnings) ? h.warnings : []), Number(h.ts) || ts]
+    );
+  }
+
+  const records = Array.isArray(body.records) ? body.records : [];
+  await query('DELETE FROM medical_records WHERE owner_key = $1', [key]);
+  for (const r of records) {
+    if (!r.title) continue;
+    await query(
+      `INSERT INTO medical_records (id,owner_key,title,type,record_date,patient_id,facility,doctor,result_summary,notes,fields,created_at,updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$12)`,
+      [r.id || uid('rec'), key, r.title, r.type || 'Report', r.recordDate || '',
+       r.patientId || '', r.facility || '', r.doctor || '', r.resultSummary || '', r.notes || '',
+       JSON.stringify(Array.isArray(r.fields) ? r.fields : []), Number(r.createdAt) || ts]
     );
   }
 

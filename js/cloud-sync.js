@@ -13,8 +13,9 @@
 
     const CONFIG = {
         syncUrl: '/api/sync',
+        authUrl: '/api/auth',
         caregiversUrl: '/api/caregivers',
-        deviceKeyStorage: 'ciphera_device_key',
+        authTokenStorage: 'ciphera_auth_token', // sessionStorage
         syncLagStorage: 'ciphera_last_sync',
         offlineCache: 'ciphera_sync_offline',
         watchKeys: [
@@ -22,19 +23,20 @@
             'medguard_logs',
             'medguard_settings',
             'ciphera_patients',
-            'ciphera_doctor_history'
+            'ciphera_doctor_history',
+            'ciphera_medical_records'
         ]
     };
 
-    // ── device / profile key ─────────────────────────────────────────────
-    function deviceKey() {
-        let k = localStorage.getItem(CONFIG.deviceKeyStorage);
-        if (!k) {
-            k = 'dev_' + (crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
-            try { localStorage.setItem(CONFIG.deviceKeyStorage, k); } catch (e) {}
-        }
-        return k;
+    // ── auth token / account root ──────────────────────────────────────
+    function token() {
+      try { return sessionStorage.getItem(CONFIG.authTokenStorage) || null; } catch (e) { return null; }
     }
+    function accountId() {
+      // user.id is embedded in the login payload for convenience.
+      try { return sessionStorage.getItem('ciphera_user_id') || null; } catch (e) { return null; }
+    }
+    function isAuthed() { return !!token(); }
 
     // ── field mapping helpers ───────────────────────────────────────────┐
     const MED_FWD = { expiryDate: 'expiry_date', batchNo: 'batch_no', openedDate: 'opened_date', storageLocation: 'storage_location' };
@@ -77,6 +79,25 @@
         return { id: r.id, patientId: r.patient_id || 'p_self', question: r.question, answer: r.answer, warnings: r.warnings || [], ts: r.ts };
     }
 
+    function recordToApi(r) {
+        return {
+            id: r.id, title: r.title || 'Untitled record', type: r.type || 'Report',
+            recordDate: r.recordDate || r.date || '', patientId: r.patientId || '',
+            facility: r.facility || '', doctor: r.doctor || '',
+            resultSummary: r.resultSummary || r.results || '', notes: r.notes || '',
+            fields: r.fields || [], createdAt: r.createdAt || Date.now()
+        };
+    }
+    function recordFromApi(r) {
+        return {
+            id: r.id, title: r.title || 'Untitled record', type: r.type || 'Report',
+            recordDate: r.recordDate || '', patientId: r.patientId || '',
+            facility: r.facility || '', doctor: r.doctor || '',
+            resultSummary: r.resultSummary || '', notes: r.notes || '',
+            fields: r.fields || [], createdAt: r.createdAt || Date.now()
+        };
+    }
+
     // ── bundle builders ─────────────────────────────────────────────────
     function buildLocalBundle() {
         const medicines = MedStore.getAll().map(medToApi);
@@ -84,7 +105,8 @@
         const settings = MedStore.getSettings();
         const patients = (window.Care && Care.getAll() || []).map(patientToApi);
         const doctorHistory = JSON.parse(localStorage.getItem('ciphera_doctor_history') || '[]').map(historyToApi);
-        return { medicines, logs, settings, patients, doctorHistory };
+        const records = JSON.parse(localStorage.getItem('ciphera_medical_records') || '[]').map(recordToApi);
+        return { medicines, logs, settings, patients, doctorHistory, records };
     }
 
     function applyServerBundle(bundle) {
@@ -103,6 +125,9 @@
         if (bundle.doctorHistory && Array.isArray(bundle.doctorHistory)) {
             localStorage.setItem('ciphera_doctor_history', JSON.stringify(bundle.doctorHistory.map(historyFromApi)));
         }
+        if (bundle.records && Array.isArray(bundle.records)) {
+            localStorage.setItem('ciphera_medical_records', JSON.stringify(bundle.records.map(recordFromApi)));
+        }
     }
 
     // ── API calls ───────────────────────────────────────────────────────
@@ -113,9 +138,14 @@
         });
     }
 
+    function authHeaders() {
+        const t = token();
+        return t ? { Authorization: 'Bearer ' + t } : {};
+    }
+
     async function pull() {
         try {
-            const d = await api(CONFIG.syncUrl + '?key=' + encodeURIComponent(deviceKey()), { method: 'GET' });
+            const d = await api(CONFIG.syncUrl, { method: 'GET', headers: authHeaders() });
             const b = d.bundle;
             if (b) {
                 const serverHasData = (b.medicines && b.medicines.length)
@@ -148,9 +178,9 @@
         pushTimer = null;
         try {
             const body = buildLocalBundle();
-            const d = await api(CONFIG.syncUrl + '?key=' + encodeURIComponent(deviceKey()), {
+            const d = await api(CONFIG.syncUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
                 body: JSON.stringify(body)
             });
             if (d.saved) {
@@ -190,11 +220,38 @@
         if (CONFIG.watchKeys.indexOf(key) !== -1) schedulePush();
     };
 
+    // ── app account auth (login gate) ──────────────────────────────────
+    async function serverAuth(action, { name, email, password }) {
+        return api(CONFIG.authUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action, name, email, password })
+        });
+    }
+    function setSession(result) {
+        if (result && result.token) {
+            sessionStorage.setItem(CONFIG.authTokenStorage, result.token);
+            sessionStorage.setItem('ciphera_user_id', result.user ? result.user.id : accountId());
+            sessionStorage.setItem('ciphera_user_email', result.user ? result.user.email : '');
+        }
+    }
+    function logout() {
+        sessionStorage.removeItem(CONFIG.authTokenStorage);
+        sessionStorage.removeItem('ciphera_user_id');
+        sessionStorage.removeItem('ciphera_user_email');
+    }
+
     const CloudSync = {
-        deviceKey,
         pull,
         push,
         schedulePush,
+        authHeaders,
+        token,
+        accountId,
+        isAuthed,
+        setSession,
+        logout,
+        serverAuth,
         serverRegisterCaregiver,
         serverLoginCaregiver,
         isOffline: () => localStorage.getItem(CONFIG.offlineCache) === '1',
@@ -206,6 +263,8 @@
     // Boot: pull latest from cloud before the app renders. The app calls
     // CloudSync.boot() from MedStore.init()/App after DOM ready.
     CloudSync.boot = async function () {
+        if (!isAuthed()) return false;
         await pull();
+        return true;
     };
 })();

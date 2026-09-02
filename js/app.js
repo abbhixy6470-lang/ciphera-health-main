@@ -36,6 +36,7 @@ const App = {
         Care.init();
         Analytics.init();
         AiReader.init();
+        if (typeof window.Vault !== 'undefined') Vault.init();
 
         // Check Notification Permission State
         this.updateNotifButtonState();
@@ -110,6 +111,7 @@ const App = {
         if (tabId === 'patients') Care.render();
         if (tabId === 'recommendations') this.renderRecommendations();
         if (tabId === 'ai-doctor') this.renderAIDoctor();
+        if (tabId === 'vault') { if (window.Vault) Vault.render(); }
 
         lucide.createIcons();
     },
@@ -138,10 +140,20 @@ const App = {
         AiReader.openSettings();
     },
 
-    // Enter from opening screen
-    enterApp() {
+    // Enter from opening screen (requires a real account login)
+    async enterApp() {
+        if (typeof window.Auth !== 'undefined' && Auth.isLoggedIn() === false) {
+            Auth.show();
+            return;
+        }
         const splash = document.getElementById('openingScreen');
         if (!splash) return;
+        // On entry with a live session, pull cloud data and re-render.
+        if (typeof window.CloudSync !== 'undefined') {
+            CloudSync.boot().then(() => {
+                try { this.renderAllViews && this.renderAllViews(); } catch (e) {}
+            }).catch(() => {});
+        }
         // Fade out splash, then remove it and reveal app
         splash.style.opacity = '0';
         splash.style.pointerEvents = 'none';
@@ -1233,6 +1245,55 @@ const App = {
         this.syncCaregiverUI();
         this.closeCaregiverModal();
         this.showToast('✅ Caregiver account created & signed in (patient consent recorded).', 'success');
+    },
+
+    async submitAuthLogin(event) {
+        event.preventDefault();
+        const errEl = document.getElementById('authLoginError');
+        errEl.classList.add('hidden');
+        const btn = document.getElementById('authLoginBtn');
+        btn.disabled = true;
+        try {
+            const email = document.getElementById('authLoginEmail').value;
+            const password = document.getElementById('authLoginPassword').value;
+            const result = await Auth.submitLogin(email, password);
+            this.showToast('✅ Signed in! Your cloud data is loading…', 'success');
+            return result;
+        } catch (e) {
+            errEl.textContent = e.message || 'Sign in failed.';
+            errEl.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+        }
+    },
+
+    async submitAuthRegister(event) {
+        event.preventDefault();
+        const errEl = document.getElementById('authRegError');
+        errEl.classList.add('hidden');
+        const btn = document.getElementById('authRegBtn');
+        btn.disabled = true;
+        try {
+            const name = document.getElementById('authRegName').value;
+            const email = document.getElementById('authRegEmail').value;
+            const password = document.getElementById('authRegPassword').value;
+            await Auth.submitRegister(name, email, password);
+            this.showToast('✅ Account created! Welcome to Ciphera Health+.', 'success');
+        } catch (e) {
+            errEl.textContent = e.message || 'Could not create account.';
+            errEl.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+        }
+    },
+
+    logout() {
+        if (typeof window.Auth !== 'undefined') Auth.logout();
+        else if (typeof window.CloudSync !== 'undefined') CloudSync.logout();
+    },
+
+    saveVaultRecord(event) {
+        if (typeof window.Vault !== 'undefined') Vault.saveRecord(event);
     },
 
     async requestPushNotifications() {

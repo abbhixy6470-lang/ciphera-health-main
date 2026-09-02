@@ -56,8 +56,9 @@ export function hashPassword(raw) {
 }
 
 let cachedSessionSecret = process.env.SESSION_SECRET || 'ciphera_dev_secret_change_me';
-export function signToken(payload) {
-  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+const SESSION_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+export function signToken(payload, ttl = SESSION_TTL) {
+  const body = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + ttl })).toString('base64url');
   const sig = crypto.createHmac('sha256', cachedSessionSecret).update(body).digest('base64url');
   return `${body}.${sig}`;
 }
@@ -68,7 +69,12 @@ export function verifyToken(token) {
   if (parts.length !== 2) return null;
   const [body, sig] = parts;
   const expect = crypto.createHmac('sha256', cachedSessionSecret).update(body).digest('base64url');
+  if (Buffer.byteLength(sig) !== Buffer.byteLength(expect)) return null;
   if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return null;
-  try { return JSON.parse(Buffer.from(body, 'base64url').toString('utf8')); }
+  try {
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    if (payload.exp && payload.exp < Date.now()) return null; // expired
+    return payload;
+  }
   catch { return null; }
 }

@@ -154,7 +154,7 @@
             <!-- Security note -->
             <div class="flex items-center justify-center gap-2 text-xs text-white/40 splash-section">
                 <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-                <span>100% client-side • Your health data never leaves your device</span>
+                <span>Secure account login • Health data encrypted & synced to your private cloud storage</span>
             </div>
         </div>
     </div>
@@ -216,6 +216,11 @@
                         </button>
                     </div>
 
+                    <!-- Account / Logout -->
+                    <button onclick="App.logout()" title="Sign out" class="p-2 rounded-xl text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all duration-200">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+
                     <!-- Add Medicine Button (Desktop) -->
                     <button onclick="App.openAddMedicineModal()" class="hidden sm:flex items-center gap-2 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-lg shadow-brand-600/20 hover:shadow-brand-600/30 transition-all duration-200">
                         <i data-lucide="plus" class="w-4 h-4"></i>
@@ -268,6 +273,10 @@
                     <button onclick="App.switchTab('analytics')" id="tabBtn-analytics" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
                         <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
                         <span>Health Analytics</span>
+                    </button>
+                    <button onclick="App.switchTab('vault')" id="tabBtn-vault" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="archive" class="w-4 h-4"></i>
+                        <span>Medical Vault</span>
                     </button>
                 </nav>
             </div>
@@ -1072,6 +1081,62 @@
         </div>
 
 
+        <!-- ========================================================================= -->
+        <!-- TAB: MEDICAL VAULT -->
+        <!-- ========================================================================= -->
+        <div id="view-vault" class="tab-pane hidden space-y-6">
+
+            <!-- Hero -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-brand-500/10 to-teal-500/5 rounded-full -mr-24 -mt-24"></div>
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide bg-gradient-to-r from-brand-100 to-teal-50 text-brand-700 dark:from-brand-900/50 dark:to-teal-900/30 dark:text-brand-300 mb-2 border border-brand-200/60 dark:border-brand-800/40">
+                            <i data-lucide="archive" class="w-3.5 h-3.5"></i> Secure Medical Records
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Medical Record Vault</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            Store test results, prescriptions, past diagnoses and scan summaries — securely tied to your account and synced to your private cloud.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="Vault.openAdd()" class="inline-flex items-center gap-2 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition-all duration-200 hover:-translate-y-0.5">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Add Record
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <input id="vaultSearch" type="text" oninput="Vault.render()" placeholder="Search records…" class="w-full sm:max-w-xs px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500">
+                <select id="vaultFilter" onchange="Vault.render()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-brand-500">
+                    <option value="">All types</option>
+                    <option value="Lab Report">Lab Report</option>
+                    <option value="Imaging">Imaging</option>
+                    <option value="Prescription">Prescription</option>
+                    <option value="Discharge Summary">Discharge Summary</option>
+                    <option value="Immunization">Immunization</option>
+                    <option value="Vaccination">Vaccination</option>
+                    <option value="Consultation">Consultation</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span id="vaultCount" class="text-xs font-semibold text-slate-400 dark:text-slate-500"></span>
+            </div>
+
+            <!-- Records list -->
+            <div id="vaultEmpty" class="hidden text-center py-16">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                    <i data-lucide="archive" class="w-8 h-8 text-slate-400"></i>
+                </div>
+                <p class="text-sm font-bold text-slate-600 dark:text-slate-300">No medical records yet</p>
+                <p class="text-xs text-slate-400 mt-1">Add your first test result or history to start your vault.</p>
+            </div>
+            <div id="vaultGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+
 
     </main>
 
@@ -1558,6 +1623,84 @@
         </div>
     </div>
 
+    <!-- ========================================================================= -->
+    <!-- MODAL 8: MEDICAL RECORD VAULT (ADD / EDIT / VIEW) -->
+    <!-- ========================================================================= -->
+    <div id="vaultModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-7 animate-pop my-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-300 flex items-center justify-center">
+                        <i data-lucide="archive" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 id="vaultModalTitle" class="text-lg font-bold text-slate-900 dark:text-white">Add Medical Record</h3>
+                        <p class="text-xs text-slate-500">Secure record for test results & history</p>
+                    </div>
+                </div>
+                <button onclick="Vault.closeModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="vaultForm" onsubmit="App.saveVaultRecord(event)" class="space-y-4 mt-4">
+                <input type="hidden" id="vaultFormId">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Title *</label>
+                        <input id="vaultFormTitle" type="text" required placeholder="e.g. Complete Blood Count, Dec 2025" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Record Type</label>
+                        <select id="vaultFormType" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                            <option>Lab Report</option><option>Imaging</option><option>Prescription</option>
+                            <option>Discharge Summary</option><option>Immunization</option><option>Vaccination</option>
+                            <option>Consultation</option><option>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Date</label>
+                        <input id="vaultFormDate" type="date" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Facility / Lab</label>
+                        <input id="vaultFormFacility" type="text" placeholder="e.g. City General Hospital" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Doctor</label>
+                        <input id="vaultFormDoctor" type="text" placeholder="e.g. Dr. Sharma" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="vaultFormPatient" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Patient</label>
+                    <select id="vaultFormPatient" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500"></select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Result / Summary</label>
+                    <textarea id="vaultFormSummary" rows="3" placeholder="Key values, findings, or result summary…" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 resize-y"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Notes</label>
+                    <textarea id="vaultFormNotes" rows="2" placeholder="Additional context (optional)…" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 resize-y"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" onclick="Vault.closeModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-slate-700">Cancel</button>
+                    <button type="submit" class="inline-flex items-center gap-2 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition">
+                        <i data-lucide="save" class="w-4 h-4"></i> Save Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Application JavaScript Modules -->
     <script src="js/precautions-data.js"></script>
     <script src="js/expiry-engine.js"></script>
@@ -1574,6 +1717,8 @@
     <script src="js/recommendations.js"></script>
     <script src="js/ai-doctor.js"></script>
     <script src="js/caregivers.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/vault.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
