@@ -2,23 +2,6 @@
 // apply / ensure the schema idempotently on first run.
 
 export const SCHEMA_UP = `
-CREATE TABLE IF NOT EXISTS app_users (
-  id            TEXT PRIMARY KEY,
-  email         TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  created_at    BIGINT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS caregivers (
-  id           TEXT PRIMARY KEY,
-  email        TEXT UNIQUE NOT NULL,
-  name         TEXT NOT NULL,
-  password_hash TEXT NOT NULL,
-  consent_given BOOLEAN NOT NULL DEFAULT FALSE,
-  consent_at   BIGINT,
-  created_at   BIGINT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS patients (
   id           TEXT PRIMARY KEY,
   owner_key    TEXT NOT NULL,

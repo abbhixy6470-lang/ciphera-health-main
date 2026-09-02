@@ -1,6 +1,5 @@
 /* Ciphera Health+ — Cloud Sync (Vercel Postgres backend)
- * Bridges the app's localStorage data model to the /api sync + caregivers
- * endpoints. Strategy:
+ * Bridges the app's localStorage data model to the /api sync endpoint. Strategy:
  *   - Server is the source of truth. On boot we `pull()`; after any local
  *     mutation we debounced `push()` the full bundle.
  *   - Works 100% offline: when the API is unreachable, the app keeps using
@@ -13,9 +12,7 @@
 
     const CONFIG = {
         syncUrl: '/api/sync',
-        authUrl: '/api/auth',
-        caregiversUrl: '/api/caregivers',
-        authTokenStorage: 'ciphera_auth_token', // sessionStorage
+        deviceKeyStorage: 'ciphera_device_key',
         syncLagStorage: 'ciphera_last_sync',
         offlineCache: 'ciphera_sync_offline',
         watchKeys: [
@@ -28,15 +25,15 @@
         ]
     };
 
-    // ── auth token / account root ──────────────────────────────────────
-    function token() {
-      try { return sessionStorage.getItem(CONFIG.authTokenStorage) || null; } catch (e) { return null; }
+    // ── device / profile key ─────────────────────────────────────────────
+    function deviceKey() {
+        let k = localStorage.getItem(CONFIG.deviceKeyStorage);
+        if (!k) {
+            k = 'dev_' + (crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+            try { localStorage.setItem(CONFIG.deviceKeyStorage, k); } catch (e) {}
+        }
+        return k;
     }
-    function accountId() {
-      // user.id is embedded in the login payload for convenience.
-      try { return sessionStorage.getItem('ciphera_user_id') || null; } catch (e) { return null; }
-    }
-    function isAuthed() { return !!token(); }
 
     // ── field mapping helpers ───────────────────────────────────────────┐
     const MED_FWD = { expiryDate: 'expiry_date', batchNo: 'batch_no', openedDate: 'opened_date', storageLocation: 'storage_location' };
@@ -138,14 +135,9 @@
         });
     }
 
-    function authHeaders() {
-        const t = token();
-        return t ? { Authorization: 'Bearer ' + t } : {};
-    }
-
     async function pull() {
         try {
-            const d = await api(CONFIG.syncUrl, { method: 'GET', headers: authHeaders() });
+            const d = await api(CONFIG.syncUrl + '?key=' + encodeURIComponent(deviceKey()), { method: 'GET' });
             const b = d.bundle;
             if (b) {
                 const serverHasData = (b.medicines && b.medicines.length)
@@ -178,9 +170,9 @@
         pushTimer = null;
         try {
             const body = buildLocalBundle();
-            const d = await api(CONFIG.syncUrl, {
+            const d = await api(CONFIG.syncUrl + '?key=' + encodeURIComponent(deviceKey()), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             if (d.saved) {
@@ -190,22 +182,6 @@
         } catch (e) {
             localStorage.setItem(CONFIG.offlineCache, '1');
         }
-    }
-
-    // ── caregiver auth via server ───────────────────────────────────────
-    async function serverRegisterCaregiver(name, email, password, consent) {
-        return api(CONFIG.caregiversUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'register', name, email, password, consent })
-        });
-    }
-    async function serverLoginCaregiver(email, password) {
-        return api(CONFIG.caregiversUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'login', email, password })
-        });
     }
 
     // ── wire into existing write paths with zero modifications ─────────
@@ -220,40 +196,11 @@
         if (CONFIG.watchKeys.indexOf(key) !== -1) schedulePush();
     };
 
-    // ── app account auth (login gate) ──────────────────────────────────
-    async function serverAuth(action, { name, email, password }) {
-        return api(CONFIG.authUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action, name, email, password })
-        });
-    }
-    function setSession(result) {
-        if (result && result.token) {
-            sessionStorage.setItem(CONFIG.authTokenStorage, result.token);
-            sessionStorage.setItem('ciphera_user_id', result.user ? result.user.id : accountId());
-            sessionStorage.setItem('ciphera_user_email', result.user ? result.user.email : '');
-        }
-    }
-    function logout() {
-        sessionStorage.removeItem(CONFIG.authTokenStorage);
-        sessionStorage.removeItem('ciphera_user_id');
-        sessionStorage.removeItem('ciphera_user_email');
-    }
-
     const CloudSync = {
         pull,
         push,
         schedulePush,
-        authHeaders,
-        token,
-        accountId,
-        isAuthed,
-        setSession,
-        logout,
-        serverAuth,
-        serverRegisterCaregiver,
-        serverLoginCaregiver,
+        deviceKey,
         isOffline: () => localStorage.getItem(CONFIG.offlineCache) === '1',
         lastSync: () => Number(localStorage.getItem(CONFIG.syncLagStorage)) || 0
     };
@@ -263,7 +210,6 @@
     // Boot: pull latest from cloud before the app renders. The app calls
     // CloudSync.boot() from MedStore.init()/App after DOM ready.
     CloudSync.boot = async function () {
-        if (!isAuthed()) return false;
         await pull();
         return true;
     };

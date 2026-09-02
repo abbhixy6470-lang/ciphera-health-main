@@ -1,30 +1,30 @@
 // GET/POST /api/sync — full cloud sync of patient data.
 //
 // GET  -> returns the current full dataset (patients, medicines, logs,
-//         settings, doctor history) for this device key.
-// POST -> replaces/merges the full dataset for this device key.
+//         settings, doctor history, records) for this owner key.
+// POST -> replaces/merges the full dataset for this owner key.
 //
-// Uses a lightweight bearer token (in Authorization header or ?key=) derived
-// from the device, so no heavy account ceremony is required for patients.
+// Uses a lightweight owner key (in Authorization header or ?key=) derived
+// from the device, so no heavy account ceremony is required.
 
 import { query } from '../db/client.js';
-import { corsHeaders, sendOptions, ok, err, uid, now, verifyToken } from '../db/helpers.js';
+import { corsHeaders, sendOptions, ok, err, uid, now } from '../db/helpers.js';
 
-// The owner_key is the authenticated app user's id (from the session token),
-// so each account's data is fully isolated.
-function authedOwnerKey(req) {
+// The owner_key scopes each device's dataset. Accept it in the Authorization
+// header (Bearer) or as a ?key= query parameter.
+function ownerKey(req) {
   const auth = req.headers['authorization'] || '';
-  if (!auth.startsWith('Bearer ')) return null;
-  const payload = verifyToken(auth.slice(7).trim());
-  return payload && payload.sub ? payload.sub : null;
+  if (auth.startsWith('Bearer ')) return auth.slice(7).trim();
+  const u = new URL(req.url, 'http://x');
+  return u.searchParams.get('key') || '';
 }
 
 export default async function handler(req, res) {
   for (const [k, v] of Object.entries(corsHeaders())) res.setHeader(k, v);
   if (req.method === 'OPTIONS') return sendOptions(res);
 
-  const key = authedOwnerKey(req);
-  if (!key) return err(res, 'Not authenticated. Missing or invalid session token.', 401);
+  const key = ownerKey(req);
+  if (!key) return err(res, 'Missing owner key (Authorization: Bearer <key> or ?key=)', 401);
 
   try {
     if (req.method === 'GET') {

@@ -41,9 +41,6 @@ const App = {
         // Check Notification Permission State
         this.updateNotifButtonState();
 
-        // Restore caregiver session badge (if a session persists)
-        this.syncCaregiverUI();
-
         // Initialize Lucide Icons
         lucide.createIcons();
 
@@ -140,15 +137,11 @@ const App = {
         AiReader.openSettings();
     },
 
-    // Enter from opening screen (requires a real account login)
+    // Enter from opening screen
     async enterApp() {
-        if (typeof window.Auth !== 'undefined' && Auth.isLoggedIn() === false) {
-            Auth.show();
-            return;
-        }
         const splash = document.getElementById('openingScreen');
         if (!splash) return;
-        // On entry with a live session, pull cloud data and re-render.
+        // Pull cloud data for this device, then reveal.
         if (typeof window.CloudSync !== 'undefined') {
             CloudSync.boot().then(() => {
                 try { this.renderAllViews && this.renderAllViews(); } catch (e) {}
@@ -617,7 +610,6 @@ const App = {
                 const timeTaken = new Date(l.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const isTaken = l.status === 'TAKEN';
                 const actor = String(l.actor || 'Patient');
-                const actorTone = actor.toLowerCase().includes('caregiver') ? 'text-violet-600 dark:text-violet-400' : 'text-slate-600 dark:text-slate-300';
                 const statusLabel = isTaken ? 'Taken' : 'Skipped';
 
                 return `
@@ -628,7 +620,7 @@ const App = {
                             </div>
                             <div>
                                 <span class="font-bold text-slate-800 dark:text-slate-200">${String(med.name).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>
-                                <span class="text-[10px] text-slate-500 block">${l.date} • Scheduled ${l.scheduledTime} • Marked by <span class="font-semibold ${actorTone}">${actor.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span></span>
+                                <span class="text-[10px] text-slate-500 block">${l.date} • Scheduled ${l.scheduledTime} • Marked by <span class="font-semibold text-slate-600 dark:text-slate-300">${actor.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span></span>
                             </div>
                         </div>
                         <div class="text-right">
@@ -1149,149 +1141,8 @@ const App = {
     },
 
     // =========================================================================
-    // 9. CAREGIVER ACCESS
+    // 9. MEDICAL RECORD VAULT
     // =========================================================================
-    openCaregiverModal() {
-        const modal = document.getElementById('caregiverModal');
-        if (!modal) return;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        this.syncCaregiverUI();
-        this.toggleCaregiverMode(CaregiverAuth.isCaregiverLoggedIn() ? 'login' : 'login');
-    },
-
-    closeCaregiverModal() {
-        const modal = document.getElementById('caregiverModal');
-        if (!modal) return;
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    },
-
-    cancelCaregiver() {
-        this.closeCaregiverModal();
-    },
-
-    toggleCaregiverMode(mode) {
-        const loginForm = document.getElementById('cgLoginForm');
-        const regForm = document.getElementById('cgRegisterForm');
-        const loginBtn = document.getElementById('cgModeLoginBtn');
-        const regBtn = document.getElementById('cgModeRegisterBtn');
-
-        const makeActive = (act, inact) => {
-            act.classList.remove('bg-slate-100', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-300');
-            act.classList.add('bg-violet-100', 'text-violet-700', 'dark:bg-violet-900/50', 'dark:text-violet-300');
-            inact.classList.remove('bg-violet-100', 'text-violet-700', 'dark:bg-violet-900/50', 'dark:text-violet-300');
-            inact.classList.add('bg-slate-100', 'text-slate-600', 'dark:bg-slate-800', 'dark:text-slate-300');
-        };
-
-        if (mode === 'register') {
-            loginForm.classList.add('hidden');
-            regForm.classList.remove('hidden');
-            makeActive(regBtn, loginBtn);
-        } else {
-            regForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-            makeActive(loginBtn, regBtn);
-        }
-    },
-
-    syncCaregiverUI() {
-        const badge = document.getElementById('caregiverBadge');
-        if (!badge) return;
-        const logged = CaregiverAuth.isCaregiverLoggedIn();
-        if (logged) {
-            const cur = CaregiverAuth.currentActor();
-            badge.textContent = `Caregiver: ${cur.name}`;
-            badge.classList.remove('hidden');
-        } else {
-            badge.textContent = '';
-            badge.classList.add('hidden');
-        }
-    },
-
-    async submitCaregiverLogin(event) {
-        event.preventDefault();
-        const email = document.getElementById('cgLoginEmail').value;
-        const password = document.getElementById('cgLoginPassword').value;
-        const errEl = document.getElementById('cgLoginError');
-        errEl.classList.add('hidden');
-
-        const result = await CaregiverAuth.login(email, password);
-        if (!result.ok) {
-            errEl.textContent = result.error;
-            errEl.classList.remove('hidden');
-            return;
-        }
-        this.syncCaregiverUI();
-        this.closeCaregiverModal();
-        this.showToast('✅ Caregiver access granted.', 'success');
-    },
-
-    async submitCaregiverRegister(event) {
-        event.preventDefault();
-        const name = document.getElementById('cgRegName').value;
-        const email = document.getElementById('cgRegEmail').value;
-        const password = document.getElementById('cgRegPassword').value;
-        const consent = document.getElementById('cgRegConsent').checked;
-        const errEl = document.getElementById('cgRegisterError');
-        errEl.classList.add('hidden');
-
-        const result = await CaregiverAuth.register(name, email, password, consent);
-        if (!result.ok) {
-            errEl.textContent = result.error;
-            errEl.classList.remove('hidden');
-            return;
-        }
-        this.syncCaregiverUI();
-        this.closeCaregiverModal();
-        this.showToast('✅ Caregiver account created & signed in (patient consent recorded).', 'success');
-    },
-
-    async submitAuthLogin(event) {
-        event.preventDefault();
-        const errEl = document.getElementById('authLoginError');
-        errEl.classList.add('hidden');
-        const btn = document.getElementById('authLoginBtn');
-        btn.disabled = true;
-        try {
-            const email = document.getElementById('authLoginEmail').value;
-            const password = document.getElementById('authLoginPassword').value;
-            const result = await Auth.submitLogin(email, password);
-            this.showToast('✅ Signed in! Your cloud data is loading…', 'success');
-            return result;
-        } catch (e) {
-            errEl.textContent = e.message || 'Sign in failed.';
-            errEl.classList.remove('hidden');
-        } finally {
-            btn.disabled = false;
-        }
-    },
-
-    async submitAuthRegister(event) {
-        event.preventDefault();
-        const errEl = document.getElementById('authRegError');
-        errEl.classList.add('hidden');
-        const btn = document.getElementById('authRegBtn');
-        btn.disabled = true;
-        try {
-            const name = document.getElementById('authRegName').value;
-            const email = document.getElementById('authRegEmail').value;
-            const password = document.getElementById('authRegPassword').value;
-            await Auth.submitRegister(name, email, password);
-            this.showToast('✅ Account created! Welcome to Ciphera Health+.', 'success');
-        } catch (e) {
-            errEl.textContent = e.message || 'Could not create account.';
-            errEl.classList.remove('hidden');
-        } finally {
-            btn.disabled = false;
-        }
-    },
-
-    logout() {
-        if (typeof window.Auth !== 'undefined') Auth.logout();
-        else if (typeof window.CloudSync !== 'undefined') CloudSync.logout();
-    },
-
     saveVaultRecord(event) {
         if (typeof window.Vault !== 'undefined') Vault.saveRecord(event);
     },

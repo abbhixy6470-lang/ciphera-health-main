@@ -262,12 +262,7 @@ const MedStore = {
         const todayStr = new Date().toISOString().split('T')[0];
         const logs = this.getAllLogs();
 
-        // Default actor: who is driving the app right now (patient or caregiver)
-        let who = actor || 'Patient';
-        if (typeof window.CaregiverAuth !== 'undefined') {
-            const cur = window.CaregiverAuth.currentActor();
-            who = actor || (cur.role === 'caregiver' ? `Caregiver: ${cur.name}` : 'Patient');
-        }
+        const who = actor || 'Patient';
 
         // Check if existing log for today and scheduledTime
         const idx = logs.findIndex(l => l.medicineId === medicineId && l.scheduledTime === scheduledTime && l.date === todayStr);

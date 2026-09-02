@@ -132,22 +132,15 @@ const ReminderAlarm = {
 
         this.alarmInterval = setInterval(() => {
             this.checkReminders();
-            this.checkCriticalMisses(); // notify caregivers + patient on critical missed doses
+            this.checkCriticalMisses(); // notify the patient on critical missed doses
         }, 1000);
     },
 
     /**
-     * Caregiver-aware notification: notify both the patient AND any logged-in caregiver.
+     * Notify the patient of a reminder event.
      */
     notifyBoth(title, body, medId) {
-        // Patient
-        this.notify(title + ' (Patient)', body, medId);
-
-        // Caregiver (if logged in)
-        if (window.CaregiverAuth && window.CaregiverAuth.isCaregiverLoggedIn()) {
-            const cur = window.CaregiverAuth.currentActor();
-            this.notify(`${title} — Caregiver (${cur.name})`, body, `caregiver-${medId}`);
-        }
+        this.notify(title, body, medId);
     },
 
     /**
