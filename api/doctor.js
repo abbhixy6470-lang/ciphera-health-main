@@ -15,7 +15,7 @@
 
 import { corsHeaders, sendOptions, ok, err } from './db/helpers.js';
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 function generateContentUrl(model, key) {
