@@ -13,6 +13,16 @@ const App = {
         MedStore.init();
         ReminderAlarm.init();
 
+        // Start Cloud Sync (pull latest from Postgres, then re-render with cloud data)
+        if (typeof window.CloudSync !== 'undefined') {
+            CloudSync.boot().then(() => {
+                if (typeof window.Care !== 'undefined') Care.render();
+                this.renderAllViews();
+                if (typeof window.Analytics !== 'undefined') Analytics.init();
+                this.refreshCurrentView && this.refreshCurrentView();
+            }).catch(() => {});
+        }
+
         // Apply Saved Theme
         this.applyTheme();
 
