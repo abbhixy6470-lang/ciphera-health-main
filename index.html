@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciphera Health+ — Smart Medicine Expiry & Adherence Tracker</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef6ff',
+                            100: '#d9ebff',
+                            200: '#bcdcff',
+                            300: '#8ec5ff',
+                            400: '#59a5fb',
+                            500: '#3383f8',
+                            600: '#1d63ed',
+                            700: '#154ed9',
+                            800: '#183fb0',
+                            900: '#0f2b78',
+                            950: '#0a1a4a',
+                        },
+                        medical: {
+                            red: '#ef4444',
+                            amber: '#f59e0b',
+                            emerald: '#10b981',
+                            teal: '#14b8a6',
+                            purple: '#8b5cf6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tesseract.js OCR CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200 opening-lock">
+
+    <!-- Ambient Premium Background -->
+    <div class="app-ambient"></div>
+
+    <!-- ========================================================================= -->
+    <!-- OPENING / SPLASH LANDING SCREEN -->
+    <!-- ========================================================================= -->
+    <div id="openingScreen" class="opening-screen fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto opacity-100 transition-opacity duration-500">
+        <!-- Animated backdrop -->
+        <div class="absolute inset-0 bg-gradient-to-br from-[#0a1a4a] via-[#071028] to-[#04140e]"></div>
+        <div class="absolute inset-0 hero-grid-overlay opacity-60"></div>
+
+        <!-- Floating orbs -->
+        <div class="absolute w-72 h-72 rounded-full bg-brand-500/25 blur-[100px] -top-10 -left-10 animate-float-slow"></div>
+        <div class="absolute w-80 h-80 rounded-full bg-emerald-500/20 blur-[110px] top-1/3 -right-16 animate-float-slow" style="animation-delay:1.5s"></div>
+        <div class="absolute w-72 h-72 rounded-full bg-violet-500/20 blur-[100px] -bottom-20 left-1/4 animate-float-slow" style="animation-delay:3s"></div>
+
+        <!-- Content -->
+        <div class="relative z-10 max-w-2xl w-full text-center space-y-10 py-12">
+
+            <!-- Logo mark -->
+            <div class="splash-section">
+                <div class="inline-flex items-center gap-3">
+                    <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-emerald-500 flex items-center justify-center text-white shadow-2xl shadow-brand-500/40 glow-brand animate-float-slow">
+                        <i data-lucide="shield-plus" class="w-9 h-9"></i>
+                    </div>
+                    <div class="text-left">
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+                            Ciphera <span class="gradient-text-brand">Health+</span>
+                        </h1>
+                        <p class="text-[11px] tracking-[0.25em] uppercase text-white/50 mt-1 font-semibold">Smart Expiry & Timely Routine Advisor</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tagline -->
+            <div class="space-y-3 splash-section">
+                <p class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Scan. Understand. <span class="text-emerald-400">Stay Safe.</span>
+                </p>
+                <p class="text-sm sm:text-base text-white/60 max-w-lg mx-auto leading-relaxed">
+                    Track medicine expiry, read AI-powered prescriptions, manage your family's care, and never miss a dose — all in one premium health companion.
+                </p>
+            </div>
+
+            <!-- Feature highlights -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 splash-section">
+                <div class="glass-card bg-white/5 border-white/10 rounded-2xl p-4 hover:border-brand-400/40 hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="scan-line" class="w-5 h-5"></i>
+                    </div>
+                    <p class="text-xs font-bold text-white">AI Prescription Reader</p>
+                </div>
+                <div class="glass-card bg-white/5 border-white/10 rounded-2xl p-4 hover:border-emerald-400/40 hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="pill" class="w-5 h-5"></i>
+                    </div>
+                    <p class="text-xs font-bold text-white">Medicine Expiry Tracker</p>
+                </div>
+                <div class="glass-card bg-white/5 border-white/10 rounded-2xl p-4 hover:border-rose-400/40 hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-amber-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="alarm-clock" class="w-5 h-5"></i>
+                    </div>
+                    <p class="text-xs font-bold text-white">Smart Pill Reminders</p>
+                </div>
+                <div class="glass-card bg-white/5 border-white/10 rounded-2xl p-4 hover:border-violet-400/40 hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-brand-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </div>
+                    <p class="text-xs font-bold text-white">Patient & Family Care</p>
+                </div>
+                <div class="glass-card bg-white/5 border-white/10 rounded-2xl p-4 hover:border-emerald-400/40 hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-brand-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="activity" class="w-5 h-5"></i>
+                    </div>
+                    <p class="text-xs font-bold text-white">Health Analytics</p>
+                </div>
+                <div class="glass-card bg-white/5 border-white/10 rounded-2xl p-4 hover:border-teal-400/40 hover:-translate-y-1 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 text-white flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="scan-line" class="w-5 h-5"></i>
+                    </div>
+                    <p class="text-xs font-bold text-white">Expiry Scanner</p>
+                </div>
+            </div>
+
+            <!-- Enter Button -->
+            <div class="splash-section flex items-center justify-center gap-4">
+                <button onclick="App.enterApp()" class="group relative inline-flex items-center gap-3 bg-gradient-to-r from-brand-500 to-emerald-500 hover:from-brand-600 hover:to-emerald-600 text-white text-base sm:text-lg font-bold px-10 py-4 rounded-2xl shadow-2xl shadow-brand-500/40 hover:shadow-emerald-500/40 transition-all duration-300 hover:-translate-y-0.5 glow-brand">
+                    <i data-lucide="sparkles" class="w-5 h-5 group-hover:rotate-12 transition-transform"></i>
+                    <span>Enter Health+</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+
+            <!-- Security note -->
+            <div class="flex items-center justify-center gap-2 text-xs text-white/40 splash-section">
+                <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                <span>100% client-side • Your health data never leaves your device</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Print Header (Visible only on print) -->
+    <div class="print-header px-6 pt-4 hidden">
+        <h1 class="text-2xl font-bold text-slate-900">Ciphera Health+ — Personal Medication & Expiry Summary</h1>
+        <p class="text-sm text-slate-600">Generated on <span id="printDate"></span> • Clinical Expiry & Adherence Report</p>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="glass-header sticky top-0 z-30 transition-all duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="App.switchTab('dashboard')">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-500 via-brand-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 group-hover:shadow-brand-500/40 transition-shadow duration-300">
+                        <i data-lucide="shield-plus" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-brand-600 to-teal-600 dark:from-brand-400 dark:to-teal-300 bg-clip-text text-transparent">Ciphera</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold tracking-wide bg-gradient-to-r from-teal-100 to-brand-100 text-teal-700 dark:from-teal-900/60 dark:to-brand-900/60 dark:text-teal-300 border border-teal-200/80 dark:border-teal-800/60">Health+</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:block font-medium">Smart Expiry & Timely Routine Advisor</p>
+                    </div>
+                </div>
+
+                <!-- Clock & Quick Actions -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <!-- Live Time Pill -->
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-[11px] font-semibold border border-slate-200/60 dark:border-slate-700/50">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-brand-500"></i>
+                        <span id="liveClockDisplay" class="tabular-nums">--:--:--</span>
+                    </div>
+
+                    <!-- Audio Test Chime -->
+                    <button onclick="ReminderAlarm.playChime('gentle'); App.showToast('🔔 Chime sound test played!', 'info')" title="Test Medication Chime Sound" class="p-2 rounded-xl text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200">
+                        <i data-lucide="volume-2" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Push Notification Button -->
+                    <button id="btnPushNotif" onclick="App.requestPushNotifications()" title="Enable Desktop Reminders" class="p-2 rounded-xl text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200 relative">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="notifDot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-white dark:ring-slate-900"></span>
+                    </button>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="App.toggleTheme()" title="Toggle Theme" class="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200">
+                        <i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Caregiver Access -->
+                    <div class="flex items-center gap-1.5">
+                        <span id="caregiverBadge" class="hidden px-2 py-1 rounded-lg text-[10px] font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/40"></span>
+                        <button onclick="App.openCaregiverModal()" title="Caregiver Access" class="p-2 rounded-xl text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200 relative">
+                            <i data-lucide="user-cog" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Add Medicine Button (Desktop) -->
+                    <button onclick="App.openAddMedicineModal()" class="hidden sm:flex items-center gap-2 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-lg shadow-brand-600/20 hover:shadow-brand-600/30 transition-all duration-200">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Add Medicine</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2.5 no-scrollbar" aria-label="Tabs">
+                    <button onclick="App.switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn active flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/50 border border-brand-200 dark:border-brand-800 shadow-sm shadow-brand-500/5">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="App.switchTab('cabinet')" id="tabBtn-cabinet" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="pill" class="w-4 h-4"></i>
+                        <span>Medicine Cabinet</span>
+                        <span id="badgeCabinetCount" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">0</span>
+                    </button>
+                    <button onclick="App.switchTab('schedule')" id="tabBtn-schedule" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+                        <span>Dose Routine</span>
+                        <span id="badgePendingDoses" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300">0 due</span>
+                    </button>
+                    <button onclick="App.switchTab('scanner')" id="tabBtn-scanner" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        <span>Expiry OCR Scanner</span>
+                    </button>
+                    <button onclick="App.switchTab('prescription')" id="tabBtn-prescription" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        <span>AI Prescription</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-violet-100 to-brand-100 text-violet-700 dark:from-violet-900/60 dark:to-brand-900/60 dark:text-violet-300">AI</span>
+                    </button>
+                    <button onclick="App.switchTab('patients')" id="tabBtn-patients" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Patient Care</span>
+                    </button>
+                    <button onclick="App.switchTab('ai-doctor')" id="tabBtn-ai-doctor" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                        <span>AI Doctor</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-violet-100 to-brand-100 text-violet-700 dark:from-violet-900/60 dark:to-brand-900/60 dark:text-violet-300">AI</span>
+                    </button>
+                    <button onclick="App.switchTab('recommendations')" id="tabBtn-recommendations" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                        <span>Recommendations</span>
+                    </button>
+                    <button onclick="App.switchTab('analytics')" id="tabBtn-analytics" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        <span>Health Analytics</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- ========================================================================= -->
+        <!-- TAB 1: DASHBOARD VIEW -->
+        <!-- ========================================================================= -->
+        <div id="view-dashboard" class="tab-pane space-y-6">
+            
+            <!-- Urgent Expiry Banner (Displayed if any expired/expiring soon medicines exist) -->
+            <div id="urgentExpiryBanner" class="hidden"></div>
+
+            <!-- Top Metric Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-stagger">
+                <!-- Total Active Medicines -->
+                <div class="glass-card p-5 rounded-2xl flex items-center justify-between stat-card-hover cursor-default">
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Total Tracked</p>
+                        <h3 id="statTotalMeds" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">0</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1"><span id="statSafeMeds" class="text-emerald-600 dark:text-emerald-400 font-bold">0</span> in safe window</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-500/20">
+                        <i data-lucide="boxes" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Expired Medicines Alert -->
+                <div class="glass-card p-5 rounded-2xl flex items-center justify-between stat-card-hover cursor-pointer group" onclick="App.filterCabinetByStatus('EXPIRED')">
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Expired</p>
+                        <h3 id="statExpiredMeds" class="text-3xl font-extrabold text-red-600 dark:text-red-400 mt-1 tracking-tight">0</h3>
+                        <p class="text-[11px] text-red-500/80 dark:text-red-400/80 font-medium mt-1">Action: Discard Safely</p>
+                    </div>
+                    <div id="statExpiredIconBox" class="w-11 h-11 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center shadow-md shadow-red-500/20 group-hover:shadow-red-500/30 transition-shadow">
+                        <i data-lucide="alert-octagon" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Expiring Soon (< 30 Days) -->
+                <div class="glass-card p-5 rounded-2xl flex items-center justify-between stat-card-hover cursor-pointer group" onclick="App.filterCabinetByStatus('EXPIRING_SOON')">
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Expiring Soon</p>
+                        <h3 id="statExpiringSoonMeds" class="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1 tracking-tight">0</h3>
+                        <p class="text-[11px] text-amber-600/80 dark:text-amber-400/80 font-medium mt-1">Within next 30 days</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 group-hover:shadow-amber-500/30 transition-shadow">
+                        <i data-lucide="clock-alert" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <!-- Today's Adherence Rate -->
+                <div class="glass-card p-5 rounded-2xl flex items-center justify-between stat-card-hover cursor-default">
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Adherence</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 id="statAdherenceRate" class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">0%</h3>
+                            <span id="statStreakBadge" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <i data-lucide="flame" class="w-3 h-3 text-orange-500"></i> 0d streak
+                            </span>
+                        </div>
+                        <p id="statAdherenceSub" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">0 / 0 doses taken</p>
+                    </div>
+                    <!-- Radial / Circle Progress -->
+                    <div class="relative w-12 h-12 flex items-center justify-center">
+                        <svg class="w-12 h-12" viewBox="0 0 36 36">
+                            <path class="text-slate-200 dark:text-slate-700" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="statAdherenceCircle" class="text-brand-500 progress-ring-circle" stroke-dasharray="100, 100" stroke-dashoffset="100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <i data-lucide="check" class="w-5 h-5 text-brand-600 dark:text-brand-400 absolute"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column Layout: Today's Schedule & Expiry Risk Highlights -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left 2 Cols: Today's Dose Routine -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="glass-card p-6 rounded-2xl shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="clock" class="w-5 h-5 text-brand-500"></i>
+                                    <span>Today's Medication Routine</span>
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Take medicines at the right time with meals as directed</p>
+                            </div>
+                            <button onclick="App.switchTab('schedule')" class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1">
+                                Full Schedule <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+
+                        <!-- Schedule Items List -->
+                        <div id="dashTodayDosesList" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 1 Col: Quick Expiry Watchlist & Safety Tips -->
+                <div class="space-y-4">
+                    
+                    <!-- Expiry Watchlist Card -->
+                    <div class="glass-card p-6 rounded-2xl shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="calendar-x" class="w-4 h-4 text-amber-500"></i>
+                                <span>Expiry Watchlist</span>
+                            </h3>
+                            <button onclick="App.switchTab('cabinet')" class="text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline">View All</button>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Medications needing immediate renewal or safe disposal</p>
+                        
+                        <div id="dashExpiryWatchlist" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Clinical Safety Quick Box -->
+                    <div class="glass-card p-5 rounded-2xl shadow-sm bg-gradient-to-br from-brand-50/80 to-teal-50/60 dark:from-brand-950/40 dark:to-teal-950/30 border border-brand-200/50 dark:border-brand-800/30">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2.5 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/25 mt-0.5 shrink-0">
+                                <i data-lucide="info" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white">Did You Know? (Rule of 28 Days)</h4>
+                                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
+                                    Opened Eye Drops and In-use Insulin pens expire <strong class="text-brand-700 dark:text-brand-300">28 days after first opening</strong>, regardless of the package date printed on the carton.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: MEDICINE CABINET VIEW -->
+        <!-- ========================================================================= -->
+        <div id="view-cabinet" class="tab-pane hidden space-y-6">
+            
+            <!-- Controls Bar: Search, Category Filter, Status Filter & Print -->
+            <div class="glass-card p-4 rounded-2xl shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
+                
+                <!-- Search Input -->
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="cabinetSearchInput" oninput="App.renderCabinet()" placeholder="Search medicine name, active generic, or lot #..." class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-slate-100 placeholder-slate-400">
+                </div>
+
+                <!-- Filters & Actions -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Status Filter -->
+                    <select id="cabinetStatusFilter" onchange="App.renderCabinet()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-brand-500">
+                        <option value="ALL">All Statuses</option>
+                        <option value="SAFE">🟢 Safe & Valid</option>
+                        <option value="EXPIRING_SOON">🟡 Expiring Soon (<30d)</option>
+                        <option value="EXPIRED">🔴 Expired / Unsafe</option>
+                    </select>
+
+                    <!-- Category Filter -->
+                    <select id="cabinetCategoryFilter" onchange="App.renderCabinet()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-brand-500">
+                        <option value="ALL">All Categories</option>
+                        <option value="Antibiotics">Antibiotics</option>
+                        <option value="Ophthalmic (Eye Drops)">Eye Drops</option>
+                        <option value="Cardiovascular / Blood Pressure">Cardiovascular</option>
+                        <option value="Antidiabetic / Insulin">Antidiabetic / Insulin</option>
+                        <option value="Pain Relievers & NSAIDs">Pain Relievers & NSAIDs</option>
+                        <option value="Respiratory & Inhalers">Respiratory & Inhalers</option>
+                        <option value="Liquid Suspensions & Syrups">Liquid Syrups</option>
+                        <option value="Vitamins & Supplements">Vitamins</option>
+                        <option value="Topical Creams & Ointments">Topical Creams</option>
+                        <option value="General / Other">Other</option>
+                    </select>
+
+                    <!-- Print Summary Button -->
+                    <button onclick="window.print()" title="Print Medication Summary for Doctor" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        <span class="hidden md:inline">Print Report</span>
+                    </button>
+
+                    <!-- Add Medicine Button (Mobile) -->
+                    <button onclick="App.openAddMedicineModal()" class="px-3 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-lg shadow-brand-600/20 hover:shadow-brand-600/30 transition-all duration-200">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Add Medicine</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Medicine Cards Grid -->
+            <div id="cabinetGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="cabinetEmptyState" class="hidden glass-card p-12 rounded-2xl text-center space-y-3">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-slate-400 shadow-inner">
+                    <i data-lucide="pill-bottle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-800 dark:text-slate-200 tracking-tight">No Medications Found</h3>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto">No medicines matched your search or filter criteria. Try adjusting your filters or add a new medicine.</p>
+                <button onclick="App.openAddMedicineModal()" class="mt-2 inline-flex items-center gap-2 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg shadow-brand-600/20 hover:shadow-brand-600/30 transition-all duration-200">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add First Medicine
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ========================================================================= -->
+        <!-- TAB 3: DAILY DOSE SCHEDULE & TIMELY REMINDER ROUTINE -->
+        <!-- ========================================================================= -->
+        <div id="view-schedule" class="tab-pane hidden space-y-6">
+            
+            <!-- Schedule Header & Live Reminder Banner -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm bg-gradient-to-r from-brand-600 via-brand-500 to-teal-500 text-white gradient-animated" style="background-size: 200% 200%;">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 text-brand-100 text-xs font-semibold uppercase tracking-wider">
+                            <i data-lucide="alarm-clock" class="w-4 h-4 text-brand-200"></i> Live Alarm Engine Active
+                        </div>
+                        <h2 class="text-2xl font-extrabold mt-1">Timely Medication Schedule</h2>
+                        <p class="text-xs text-brand-100 mt-1 max-w-xl">
+                            Reminders trigger with audio chimes and notifications at the exact scheduled minute. Mark doses as taken to build your daily streak.
+                        </p>
+                    </div>
+
+                    <!-- Streak Card -->
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-amber-300">
+                            <i data-lucide="flame" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-brand-100 font-medium uppercase">Current Adherence Streak</p>
+                            <h3 id="scheduleStreakCount" class="text-2xl font-black">0 Days</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Day Tracker -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left 2 Cols: Doses Timeline -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="glass-card p-6 rounded-2xl shadow-sm">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="list-checks" class="w-5 h-5 text-brand-500"></i>
+                                    <span>Today's Dosage Timeline</span>
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400" id="scheduleDateSubtitle">--</p>
+                            </div>
+                            <button onclick="App.openAddMedicineModal()" class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 flex items-center gap-1 transition">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Dose
+                            </button>
+                        </div>
+
+                        <!-- Timeline list -->
+                        <div id="scheduleTimelineList" class="space-y-4">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 1 Col: Dosage Log History & Refill Alert -->
+                <div class="space-y-4">
+                    
+                    <!-- Inventory Refill Alert Box -->
+                    <div class="glass-card p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+                            <i data-lucide="archive-restore" class="w-4 h-4 text-brand-500"></i>
+                            <span>Stock & Refill Tracker</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Medications with low stock levels (< 10 doses remaining)</p>
+
+                        <div id="scheduleLowStockList" class="space-y-3">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Dose Activity Log History -->
+                    <div class="glass-card p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+                            <i data-lucide="history" class="w-4 h-4 text-slate-500"></i>
+                            <span>Recent Activity Log</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Record of doses taken or skipped</p>
+
+                        <div id="scheduleHistoryLogList" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!-- ========================================================================= -->
+        <!-- TAB 5: OPTICAL EXPIRY OCR SCANNER -->
+        <!-- ========================================================================= -->
+        <div id="view-scanner" class="tab-pane hidden space-y-6">
+            
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <div class="max-w-3xl">
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 mb-2">
+                        <i data-lucide="scan" class="w-3.5 h-3.5"></i> Client-Side OCR Engine
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Smart Medicine Strip & Box Scanner</h2>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                        Take a photo or upload an image of your medicine strip, blister pack, or carton. Our smart OCR reader extracts the <strong>Expiry Date (EXP)</strong>, <strong>Batch / Lot #</strong>, and <strong>Manufacturing Date (MFG)</strong> automatically!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Scanner Workspace (Camera / File Drop + OCR Preview) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Left: Capture / Upload Card -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="camera" class="w-4 h-4 text-brand-500"></i>
+                            <span>Capture or Upload Image</span>
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <button id="btnToggleCamera" onclick="App.toggleScannerCamera()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 transition">
+                                <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                                <span id="btnToggleCameraText">Start Camera</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Video Viewfinder Container -->
+                    <div id="cameraContainer" class="hidden relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center">
+                        <video id="scannerVideo" class="w-full h-full object-cover" autoplay playsinline muted></video>
+                        
+                        <!-- Viewfinder Overlay Box -->
+                        <div class="absolute w-3/4 h-1/2 rounded-xl border-2 border-brand-400 flex flex-col justify-between p-2 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
+                            <div class="flex justify-between">
+                                <div class="w-4 h-4 border-t-2 border-l-2 border-brand-400"></div>
+                                <div class="w-4 h-4 border-t-2 border-r-2 border-brand-400"></div>
+                            </div>
+                            <div class="text-center">
+                                <span class="bg-black/60 text-brand-300 text-[10px] px-2 py-0.5 rounded-md backdrop-blur-sm">Align EXP / BATCH date inside box</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <div class="w-4 h-4 border-b-2 border-l-2 border-brand-400"></div>
+                                <div class="w-4 h-4 border-b-2 border-r-2 border-brand-400"></div>
+                            </div>
+                        </div>
+
+                        <!-- Snapshot Button -->
+                        <button onclick="App.captureCameraFrame()" class="absolute bottom-4 px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-lg flex items-center gap-2">
+                            <i data-lucide="camera" class="w-4 h-4"></i> Take Snapshot & Scan
+                        </button>
+                    </div>
+
+                    <!-- Drag & Drop / File Input Box -->
+                    <div id="dropZoneContainer" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-400 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-50/50 dark:bg-slate-900/30" onclick="document.getElementById('fileInputOCR').click()">
+                        <input type="file" id="fileInputOCR" accept="image/*" class="hidden" onchange="App.handleImageUpload(event)">
+                        <div class="w-14 h-14 mx-auto rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center mb-3">
+                            <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">Click or Drag & Drop Medicine Image</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Supports PNG, JPG, WEBP photos of medicine foils, cartons, and bottles</p>
+                    </div>
+
+                    <!-- Image Preview Container -->
+                    <div id="imagePreviewContainer" class="hidden relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <img id="imagePreview" src="" alt="Medicine Photo" class="w-full max-h-64 object-contain mx-auto">
+                        <button onclick="App.clearScannerImage()" class="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition" title="Remove Photo">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar during OCR processing -->
+                    <div id="ocrProgressBarContainer" class="hidden space-y-2">
+                        <div class="flex justify-between text-xs text-slate-600 dark:text-slate-300">
+                            <span class="flex items-center gap-1.5 font-medium"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-brand-500"></i> Reading text with OCR...</span>
+                            <span id="ocrProgressPercent" class="font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                            <div id="ocrProgressBar" class="bg-brand-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: OCR Extraction Results & Form Pre-fill Card -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-teal-500"></i>
+                        <span>Extracted Medicine Details</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Parsed dates and batch information from your package</p>
+
+                    <!-- Extracted Result Fields -->
+                    <div class="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <!-- Detected Expiry Date -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Detected Expiry Date</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="ocrExtractedExpiry" readonly placeholder="No expiry date detected yet" class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                <span id="ocrExpiryStatusBadge" class="hidden px-2.5 py-1 rounded-full text-xs font-bold"></span>
+                            </div>
+                        </div>
+
+                        <!-- Detected Batch / Lot No -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Detected Batch / Lot #</label>
+                            <input type="text" id="ocrExtractedBatch" readonly placeholder="No lot # detected" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-100">
+                        </div>
+
+                        <!-- Detected Manufacturing Date -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Detected Mfg Date</label>
+                            <input type="text" id="ocrExtractedMfg" readonly placeholder="No Mfg date detected" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-100">
+                        </div>
+
+                        <!-- Raw OCR Text (Accordion/Toggle) -->
+                        <details class="text-xs text-slate-500">
+                            <summary class="cursor-pointer font-medium hover:text-slate-800 dark:hover:text-slate-200 py-1">View Full Raw OCR Transcript</summary>
+                            <pre id="ocrRawTextOutput" class="mt-2 p-3 rounded bg-slate-200 dark:bg-slate-950 text-[11px] font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">No text scanned yet.</pre>
+                        </details>
+                    </div>
+
+                    <!-- Auto-Fill & Add Button -->
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                        <button id="btnAutoFillMedicine" onclick="App.transferOcrToAddModal()" disabled class="flex-1 bg-teal-600 hover:bg-teal-700 disabled:opacity-40 disabled:hover:bg-teal-600 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow transition flex items-center justify-center gap-2">
+                            <i data-lucide="check-check" class="w-4 h-4"></i>
+                            <span>Add to Medicine Cabinet</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- ========================================================================= -->
+        <!-- TAB 6: AI PRESCRIPTION READER -->
+        <!-- ========================================================================= -->
+        <div id="view-prescription" class="tab-pane hidden space-y-6">
+
+            <!-- Hero -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-violet-500/10 to-emerald-500/5 rounded-full -mr-24 -mt-24"></div>
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide bg-gradient-to-r from-violet-100 to-brand-100 text-violet-700 dark:from-violet-900/50 dark:to-brand-900/30 dark:text-violet-300 mb-2 border border-violet-200/60 dark:border-violet-800/40">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Powered by Google Gemini AI
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">AI Prescription Reader</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            Upload a photo of your prescription and let AI extract the medicine name, dosage, timing, duration — then explained in simple language.
+                        </p>
+                    </div>
+                    <button onclick="App.openGeminiSettings()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-semibold flex items-center gap-2 shrink-0 transition">
+                        <i data-lucide="key-round" class="w-4 h-4"></i>
+                        <span id="geminiKeyStatus">AI Key: Not Set</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Upload -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="upload" class="w-4 h-4 text-brand-500"></i>
+                            <span>Upload Prescription</span>
+                        </h3>
+                    </div>
+
+                    <div id="rxDropZone" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-brand-500 dark:hover:border-brand-400 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-50/50 dark:bg-slate-900/30" onclick="document.getElementById('fileInputRx').click()">
+                        <input type="file" id="fileInputRx" accept="image/*" class="hidden" onchange="AiReader.handleUpload(event)">
+                        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-violet-100 to-brand-100 dark:from-violet-900/50 dark:to-brand-900/40 text-violet-600 dark:text-violet-300 flex items-center justify-center mb-3">
+                            <i data-lucide="file-plus-2" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">Click or Drop Prescription Image</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Handwritten or typed doctor prescriptions</p>
+                    </div>
+
+                    <div id="rxPreviewContainer" class="hidden relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <img id="rxPreview" src="" alt="Prescription" class="w-full max-h-64 object-contain mx-auto">
+                        <button onclick="AiReader.clearImage()" class="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white hover:bg-black/80 transition" title="Remove">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <button id="btnAnalyzeRx" onclick="AiReader.analyze()" disabled class="w-full bg-gradient-to-r from-violet-600 to-brand-600 hover:from-violet-700 hover:to-brand-700 disabled:opacity-40 disabled:hover:from-violet-600 disabled:hover:to-brand-600 text-white text-sm font-bold px-4 py-3 rounded-xl shadow-lg shadow-brand-600/20 transition flex items-center justify-center gap-2">
+                        <i data-lucide="wand-2" class="w-4 h-4"></i>
+                        <span>Analyze with AI</span>
+                    </button>
+
+                    <div id="rxProgress" class="hidden space-y-2">
+                        <div class="flex justify-between text-xs text-slate-600 dark:text-slate-300">
+                            <span class="flex items-center gap-1.5 font-medium"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin text-brand-500"></i> <span id="rxProgressText">Reading prescription...</span></span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                            <div id="rxProgressBar" class="bg-gradient-to-r from-violet-600 to-brand-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: AI Result -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm space-y-4" id="rxResultCard">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="brain" class="w-4 h-4 text-violet-500"></i>
+                        <span>AI Interpretation</span>
+                    </h3>
+                    <div id="rxResultEmpty" class="text-center py-10 space-y-3">
+                        <i data-lucide="scan-face" class="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600"></i>
+                        <p class="text-xs text-slate-400">Upload a prescription to see AI-extracted medicine details here.</p>
+                    </div>
+                    <div id="rxResultBody" class="hidden space-y-4">
+                        <!-- Populated by AiReader -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ========================================================================= -->
+        <!-- TAB 7: PATIENT CARE -->
+        <!-- ========================================================================= -->
+        <div id="view-patients" class="tab-pane hidden space-y-6">
+
+            <!-- Hero -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-emerald-500/10 to-brand-500/5 rounded-full -mr-24 -mt-24"></div>
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide bg-gradient-to-r from-emerald-100 to-teal-50 text-emerald-700 dark:from-emerald-900/50 dark:to-teal-900/30 dark:text-emerald-300 mb-2 border border-emerald-200/60 dark:border-emerald-800/40">
+                            <i data-lucide="user-round" class="w-3.5 h-3.5"></i> Patient Profiles & Family Care
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Patient Care</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            Manage patient profiles, blood groups, allergies, conditions, emergency contacts, and family members — with complete medicine history.
+                        </p>
+                    </div>
+                    <button onclick="Care.openPatientModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Add Patient</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="patientsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div id="patientsEmpty" class="hidden glass-card p-12 rounded-2xl text-center space-y-3">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 flex items-center justify-center text-emerald-500 shadow-inner">
+                    <i data-lucide="users" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-800 dark:text-slate-200 tracking-tight">No Patient Profiles Yet</h3>
+                <p class="text-xs text-slate-500 max-w-sm mx-auto">Create a patient profile to store emergency medical info, allergies, and medicine history for your family.</p>
+                <button onclick="Care.openPatientModal()" class="mt-2 inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg shadow-emerald-600/20 transition-all duration-200">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add First Patient
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ========================================================================= -->
+        <!-- TAB 8: HEALTH ANALYTICS -->
+        <!-- ========================================================================= -->
+        <div id="view-analytics" class="tab-pane hidden space-y-6">
+
+            <!-- Hero -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-brand-500/10 to-emerald-500/5 rounded-full -mr-24 -mt-24"></div>
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide bg-gradient-to-r from-brand-100 to-emerald-50 text-brand-700 dark:from-brand-900/50 dark:to-emerald-900/30 dark:text-brand-300 mb-2 border border-brand-200/60 dark:border-brand-800/40">
+                            <i data-lucide="chart-line" class="w-3.5 h-3.5"></i> Insights & Trends
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Health Analytics</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            Adherence scores, weekly & monthly trends, missed-dose analytics, and AI-powered health insights.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Stat Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-stagger">
+                <div class="glass-card p-5 rounded-2xl stat-card-hover">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Health Score</p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <h3 id="anScore" class="text-3xl font-extrabold text-brand-600 dark:text-brand-400 tracking-tight">0%</h3>
+                        <i data-lucide="activity" class="w-5 h-5 text-emerald-500"></i>
+                    </div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl stat-card-hover">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Today's Meds</p>
+                    <h3 id="anTodayMeds" class="text-3xl font-extrabold text-slate-900 dark:text-white mt-2 tracking-tight">0</h3>
+                </div>
+                <div class="glass-card p-5 rounded-2xl stat-card-hover">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Missed Doses (7d)</p>
+                    <h3 id="anMissed" class="text-3xl font-extrabold text-red-600 dark:text-red-400 mt-2 tracking-tight">0</h3>
+                </div>
+                <div class="glass-card p-5 rounded-2xl stat-card-hover">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Expiring Soon</p>
+                    <h3 id="anExpiring" class="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-2 tracking-tight">0</h3>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card p-6 rounded-2xl shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-500"></i>
+                        <span>Weekly Adherence</span>
+                    </h3>
+                    <div id="anWeeklyBars" class="flex items-end justify-between gap-2 h-44">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-500"></i>
+                        <span>12-Week Adherence Trend</span>
+                    </h3>
+                    <div id="anTrendChart" class="h-44 relative">
+                        <!-- SVG populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insight Card -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm bg-gradient-to-br from-brand-50/80 to-emerald-50/60 dark:from-brand-950/40 dark:to-emerald-950/30 border border-brand-200/50 dark:border-brand-800/30">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 rounded-2xl bg-gradient-to-br from-violet-500 to-brand-500 text-white shadow-lg shadow-brand-500/25 shrink-0">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            AI Health Insight
+                        </h4>
+                        <p id="anInsight" class="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">Loading insights...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 9: MEDICINE RECOMMENDATIONS (Allergy-Aware) -->
+        <!-- ========================================================================= -->
+        <div id="view-recommendations" class="tab-pane hidden space-y-6">
+
+            <!-- Hero -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-brand-500/10 to-emerald-500/5 rounded-full -mr-24 -mt-24"></div>
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide bg-gradient-to-r from-brand-100 to-emerald-50 text-brand-700 dark:from-brand-900/50 dark:to-emerald-900/30 dark:text-brand-300 mb-2 border border-brand-200/60 dark:border-brand-800/40">
+                            <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i> Allergy-Aware Recommendations
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Medicine Recommendations</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            Suggested medicines are cross-checked against the selected patient's allergies. Anything containing a known allergen is excluded and flagged for your safety.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Selector + Allergy Summary -->
+            <div class="glass-card p-5 rounded-2xl shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                    <div class="flex-1">
+                        <label for="recPatientSelect" class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Recommend For</label>
+                        <select id="recPatientSelect" class="w-full lg:max-w-sm px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"></select>
+                    </div>
+                    <div class="flex-1">
+                        <div class="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-800/30">
+                            <p class="text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Documented Allergies
+                            </p>
+                            <p id="recAllergySummary" class="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">No allergies on file for this patient.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Summary -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="glass-card p-4 rounded-xl text-center stat-card-hover">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Safe To Recommend</p>
+                    <h3 id="recSafeCount" class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</h3>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center stat-card-hover">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Blocked (Allergy)</p>
+                    <h3 id="recBlockedCount" class="text-2xl font-extrabold text-red-600 dark:text-red-400 mt-1">0</h3>
+                </div>
+                <div class="glass-card p-4 rounded-xl text-center stat-card-hover">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Total Considered</p>
+                    <h3 id="recTotalCount" class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">0</h3>
+                </div>
+            </div>
+
+            <!-- Safe Recommendations -->
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-3 flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i> Safe Recommendations
+                </h3>
+                <div id="recSafeList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Blocked (Allergen-Containing) -->
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-3 flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-5 h-5 text-red-500"></i> Excluded (Contains Allergen)
+                </h3>
+                <div id="recBlockedList" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+            <!-- Empty / No Data State -->
+            <div id="recEmptyState" class="hidden text-center py-14">
+                <i data-lucide="stethoscope" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto"></i>
+                <h3 class="mt-4 text-lg font-bold text-slate-800 dark:text-slate-200">No recommendation data available</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Add patients and medicines to see personalized, allergy-safe recommendations.</p>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 10: AI DOCTOR ASSISTANT -->
+        <!-- ========================================================================= -->
+        <div id="view-ai-doctor" class="tab-pane hidden space-y-6">
+
+            <!-- Hero -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-brand-500/10 to-emerald-500/5 rounded-full -mr-24 -mt-24"></div>
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide bg-gradient-to-r from-brand-100 to-emerald-50 text-brand-700 dark:from-brand-900/50 dark:to-emerald-900/30 dark:text-brand-300 mb-2 border border-brand-200/60 dark:border-brand-800/40">
+                            <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i> Personalized AI Doctor
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Ask Your AI Doctor</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            Ask about your medicines, allergies, side effects, and dosage schedules in simple language. I check your profile first and flag any conflicts.
+                        </p>
+                    </div>
+                    <button onclick="Doctor.renderHistory(document.getElementById('aiDoctorPatientSelect')?.value);" class="shrink-0 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Refresh History</button>
+                </div>
+            </div>
+
+            <!-- Patient Selector + Summary -->
+            <div class="glass-card p-5 rounded-2xl shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                    <div class="flex-1">
+                        <label for="aiDoctorPatientSelect" class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Advising On Behalf Of</label>
+                        <select id="aiDoctorPatientSelect" onchange="Doctor.render(this.value)" class="w-full lg:max-w-sm px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500"></select>
+                    </div>
+                    <div class="flex-1">
+                        <div id="aiDoctorSummary" class="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/60 text-xs text-slate-600 dark:text-slate-300 border border-slate-200/40 dark:border-slate-700/30 leading-relaxed">
+                            Loading profile…
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- Chat -->
+                <div class="lg:col-span-2 glass-card rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    <div id="aiDoctorMessages" class="flex-1 p-4 space-y-3 overflow-y-auto max-h-[520px] bg-slate-50/40 dark:bg-slate-900/20">
+                        <div class="flex justify-start">
+                            <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/40">
+                                👋 Hi! I’m your AI Doctor assistant. Ask me anything about your medicines, allergies, side effects, or how to take your doses. I’ll always consider your profile and remind you to consult your real doctor for decisions.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
+                        <input id="aiDoctorInput" type="text" placeholder="e.g. Can I take my BP medicine with food?" onkeydown="if(event.key==='Enter')Doctor.send()" class="flex-1 px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500">
+                        <button onclick="Doctor.send()" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-600 hover:from-brand-700 hover:to-emerald-700 text-white text-sm font-bold flex items-center gap-2 shadow-lg shadow-brand-600/20 transition shrink-0">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Ask</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Q&A History -->
+                <div class="glass-card rounded-2xl shadow-sm p-5">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                        <i data-lucide="history" class="w-4 h-4 text-brand-500"></i> Question History
+                    </h3>
+                    <div id="aiDoctorHistory" class="space-y-3 text-xs"></div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </main>
+
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 1: ADD / EDIT MEDICINE MODAL -->
+    <!-- ========================================================================= -->
+    <div id="addMedModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop my-8 max-h-[90vh] overflow-y-auto">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+                        <i data-lucide="pill" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 id="medModalTitle" class="text-lg font-bold text-slate-900 dark:text-white">Add Medicine to Cabinet</h3>
+                        <p class="text-xs text-slate-500">Track expiry date, dosage schedule, and safety warnings</p>
+                    </div>
+                </div>
+                <button onclick="App.closeAddMedicineModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="medForm" onsubmit="App.handleSaveMedicine(event)" class="space-y-4 mt-4">
+                <input type="hidden" id="medFormId">
+
+                <!-- Row 1: Name & Category -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Medicine Name *</label>
+                        <input type="text" id="medFormName" required placeholder="e.g. Amoxicillin 500mg" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category *</label>
+                        <select id="medFormCategory" required onchange="App.handleCategoryChange()" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                            <option value="Antibiotics">Antibiotics</option>
+                            <option value="Ophthalmic (Eye Drops)">Ophthalmic (Eye Drops)</option>
+                            <option value="Cardiovascular / Blood Pressure">Cardiovascular / Blood Pressure</option>
+                            <option value="Antidiabetic / Insulin">Antidiabetic / Insulin</option>
+                            <option value="Pain Relievers & NSAIDs">Pain Relievers & NSAIDs</option>
+                            <option value="Respiratory & Inhalers">Respiratory & Inhalers</option>
+                            <option value="Liquid Suspensions & Syrups">Liquid Suspensions & Syrups</option>
+                            <option value="Topical Creams & Ointments">Topical Creams & Ointments</option>
+                            <option value="Vitamins & Supplements">Vitamins & Supplements</option>
+                            <option value="General / Other">General / Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 2: Active Generic & Form -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Generic / Active Ingredient</label>
+                        <input type="text" id="medFormGeneric" placeholder="e.g. Amoxicillin Trihydrate" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Dosage Form</label>
+                        <select id="medFormDosageForm" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                            <option value="Tablet">Tablet</option>
+                            <option value="Capsule">Capsule</option>
+                            <option value="Eye Drops">Eye Drops</option>
+                            <option value="Oral Suspension">Oral Suspension / Syrup</option>
+                            <option value="Injection Pen">Injection / Pen</option>
+                            <option value="Inhaler (MDI)">Inhaler</option>
+                            <option value="Ointment / Cream">Ointment / Cream</option>
+                            <option value="Softgel">Softgel</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 3: Expiry Date & Presets -->
+                <div class="bg-brand-50/60 dark:bg-slate-900/60 p-4 rounded-2xl border border-brand-200/60 dark:border-brand-900/40 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider">Expiry Date *</label>
+                        <!-- Quick Presets -->
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] text-slate-500">Presets:</span>
+                            <button type="button" onclick="App.setExpiryPreset(6)" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-brand-50">+6M</button>
+                            <button type="button" onclick="App.setExpiryPreset(12)" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-brand-50">+1Y</button>
+                            <button type="button" onclick="App.setExpiryPreset(24)" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-brand-50">+2Y</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <input type="date" id="medFormExpiry" required class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <input type="text" id="medFormBatch" placeholder="Batch / Lot # (optional)" class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                        </div>
+                    </div>
+
+                    <!-- Opened Date Field (For Rule of 28 Days) -->
+                    <div id="openedDateFieldContainer" class="pt-2 border-t border-brand-200/40 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Date First Opened (if unsealed)</label>
+                            <p class="text-[11px] text-slate-500">Eye drops & insulin expire 28 days after unsealing!</p>
+                        </div>
+                        <input type="date" id="medFormOpenedDate" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100">
+                    </div>
+                </div>
+
+                <!-- Row 4: Dosage & Stock -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Dose Amount</label>
+                        <input type="text" id="medFormDosageAmount" placeholder="e.g. 1 Tablet (500mg) or 2 drops" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Current Stock / Quantity (Doses left)</label>
+                        <input type="number" id="medFormStock" min="0" placeholder="e.g. 30" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <!-- Row 5: Schedule Reminders Builder -->
+                <div class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="medFormScheduleEnabled" onchange="App.toggleFormScheduleFields()" class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500">
+                            <label for="medFormScheduleEnabled" class="text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">Set Daily Timely Reminder Schedule</label>
+                        </div>
+                        <span class="text-[11px] text-brand-600 dark:text-brand-400 font-medium">Plays live audio chime</span>
+                    </div>
+
+                    <div id="scheduleFieldsWrapper" class="hidden space-y-3 pt-2">
+                        <!-- Frequency Timing Preset Buttons -->
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="App.setSchedulePreset(['08:00'])" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500">1x Daily (08:00)</button>
+                            <button type="button" onclick="App.setSchedulePreset(['08:00', '20:00'])" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500">2x Daily (08:00, 20:00)</button>
+                            <button type="button" onclick="App.setSchedulePreset(['08:00', '14:00', '20:00'])" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500">3x Daily (8h intervals)</button>
+                        </div>
+
+                        <!-- Specific Times Inputs -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 mb-1">Dose Times (Comma separated e.g. 08:00, 20:00)</label>
+                                <input type="text" id="medFormTimesInput" placeholder="08:00, 20:00" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-slate-100">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 mb-1">Meal Relation</label>
+                                <select id="medFormMealRelation" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100">
+                                    <option value="After Food">After Food</option>
+                                    <option value="With Food">With Food / Meal</option>
+                                    <option value="Before Food">Before Food (Empty Stomach)</option>
+                                    <option value="No meal restriction">No meal restriction</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 6: Storage Location & Special Notes -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Storage Location</label>
+                        <input type="text" id="medFormStorageLocation" placeholder="e.g. Bedroom Nightstand, Fridge (2-8°C)" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Special Notes / Warnings</label>
+                        <input type="text" id="medFormNotes" placeholder="e.g. Complete 7-day course, Avoid alcohol" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+
+                <!-- Submit & Cancel Buttons -->
+                <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="App.closeAddMedicineModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-brand-600/20 transition flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i> Save Medicine
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 2: LIVE MEDICATION REMINDER ALARM MODAL -->
+    <!-- ========================================================================= -->
+    <div id="alarmModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop border-2 border-brand-500 text-center space-y-5 relative">
+            
+            <!-- Pulsing Bell Icon -->
+            <div id="alarmIconContainer" class="w-20 h-20 mx-auto rounded-3xl bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-brand-500/40 pulse-warning">
+                <i data-lucide="alarm-clock" class="w-10 h-10"></i>
+            </div>
+
+            <div>
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-brand-100 text-brand-800 dark:bg-brand-900/60 dark:text-brand-300 mb-2">
+                    Medication Time Due Now!
+                </span>
+                <h3 id="alarmMedName" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">Medicine Name</h3>
+                <p id="alarmGenericName" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Generic Active</p>
+            </div>
+
+            <!-- Expiry Warning Alert in Alarm if Expired -->
+            <div id="alarmExpiryAlertBox" class="hidden p-3 rounded-xl bg-red-100 dark:bg-red-950/80 border border-red-300 dark:border-red-800 text-xs text-red-800 dark:text-red-200 font-medium">
+                <!-- Populated if expired -->
+            </div>
+
+            <!-- Dose & Instructions Details -->
+            <div class="bg-slate-100 dark:bg-slate-900 p-4 rounded-2xl space-y-2 text-left text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-semibold">Scheduled Dose:</span>
+                    <span id="alarmDoseAmount" class="font-bold text-slate-900 dark:text-slate-100">1 Tablet</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-semibold">Meal Relation:</span>
+                    <span id="alarmMealRelation" class="font-bold text-slate-900 dark:text-slate-100">After Food</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-semibold">Scheduled Time:</span>
+                    <span id="alarmDoseTime" class="font-bold text-brand-600 dark:text-brand-400">08:00</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <button onclick="App.handleAlarmAction('TAKEN')" class="sm:col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition text-sm">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i> Mark as Taken
+                </button>
+                <button onclick="App.handleAlarmAction('SNOOZE')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow transition text-sm flex items-center justify-center gap-1.5">
+                    <i data-lucide="clock" class="w-4 h-4"></i> Snooze 10m
+                </button>
+            </div>
+            
+            <button onclick="App.handleAlarmAction('SKIP')" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium underline">
+                Skip this dose today
+            </button>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 3: MEDICINE DETAIL & PRECAUTIONS MODAL -->
+    <!-- ========================================================================= -->
+    <div id="medDetailModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-xl rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop my-8 space-y-5">
+            <div class="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <span id="detailCategoryBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold">Category</span>
+                    <h3 id="detailMedName" class="text-xl font-bold text-slate-900 dark:text-white mt-1">Medicine Name</h3>
+                    <p id="detailGeneric" class="text-xs text-slate-500">Generic Ingredient</p>
+                </div>
+                <button onclick="App.closeDetailModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Expiry Warning Callout -->
+            <div id="detailExpiryCallout" class="p-4 rounded-2xl border text-xs leading-relaxed space-y-1"></div>
+
+            <!-- Clinical Expiry Hazards Specific to this medicine category -->
+            <div class="space-y-2">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="biohazard" class="w-4 h-4 text-red-500"></i>
+                    <span>Clinical Hazards If Expired</span>
+                </h4>
+                <ul id="detailHazardsList" class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 list-disc list-inside"></ul>
+            </div>
+
+            <!-- Storage & Meal Rules -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80">
+                    <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">Proper Storage</span>
+                    <p id="detailStorage" class="text-slate-600 dark:text-slate-400">Cool dry place</p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80">
+                    <span class="font-bold text-slate-700 dark:text-slate-300 block mb-1">Meal & Timing Rule</span>
+                    <p id="detailMealRule" class="text-slate-600 dark:text-slate-400">Take with food</p>
+                </div>
+            </div>
+
+            <!-- Personalized Lifestyle Recommendations -->
+            <div class="p-4 rounded-2xl bg-gradient-to-br from-brand-50/70 to-emerald-50/60 dark:from-brand-950/40 dark:to-emerald-950/30 border border-brand-200/50 dark:border-brand-800/30 space-y-2">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-300 flex items-center gap-1.5">
+                    <i data-lucide="heart-pulse" class="w-4 h-4"></i>
+                    <span>Personalized Lifestyle Tips</span>
+                </h4>
+                <ul id="detailLifestyleList" class="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 list-disc list-inside leading-relaxed"></ul>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button onclick="App.closeDetailModal()" class="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 5: PATIENT PROFILE (ADD / EDIT) -->
+    <!-- ========================================================================= -->
+    <div id="patientModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop my-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 id="patientModalTitle" class="text-lg font-bold text-slate-900 dark:text-white">Add Patient Profile</h3>
+                        <p class="text-xs text-slate-500">Emergency medical details & family care</p>
+                    </div>
+                </div>
+                <button onclick="Care.closePatientModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="patientForm" onsubmit="Care.savePatient(event)" class="space-y-4 mt-4">
+                <input type="hidden" id="patientFormId">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
+                        <input type="text" id="patientFormName" required placeholder="e.g. John Peterson" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Age *</label>
+                        <input type="number" id="patientFormAge" required min="0" max="130" placeholder="e.g. 42" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Blood Group</label>
+                        <select id="patientFormBlood" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                            <option value="">Unknown</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Relation / Role</label>
+                        <select id="patientFormRelation" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                            <option value="Self">Self</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Child">Child</option>
+                            <option value="Grandparent">Grandparent</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Allergies (comma separated)</label>
+                    <input type="text" id="patientFormAllergies" placeholder="e.g. Penicillin, Aspirin, Peanuts" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Medical Conditions (comma separated)</label>
+                    <input type="text" id="patientFormConditions" placeholder="e.g. Hypertension, Type 2 Diabetes" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Emergency Contact</label>
+                    <input type="text" id="patientFormContact" placeholder="Name — Phone, e.g. Mary Peterson — +1 555 0132" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="Care.closePatientModal()" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i> Save Patient
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 6: GEMINI AI SETTINGS -->
+    <!-- ========================================================================= -->
+    <div id="geminiSettingsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop space-y-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-brand-500 text-white flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Gemini AI Settings</h3>
+                        <p class="text-xs text-slate-500">Configure your AI prescription reader</p>
+                    </div>
+                </div>
+                <button onclick="AiReader.closeSettings()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Google Gemini API Key</label>
+                <input type="password" id="geminiKeyInput" placeholder="AIza..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">Stored locally in your browser only. Get a free key from <span class="text-brand-600 dark:text-brand-400 font-medium">aistudio.google.com</span>. Without a key, the AI reader falls back to a built-in local parser.</p>
+            </div>
+            <button onclick="AiReader.saveSettings()" class="w-full bg-gradient-to-r from-violet-600 to-brand-600 hover:from-violet-700 hover:to-brand-700 text-white text-sm font-bold px-4 py-3 rounded-xl shadow-lg shadow-brand-600/20 transition">
+                Save & Activate AI
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 7: CAREGIVER ACCESS (SHARED) -->
+    <!-- ========================================================================= -->
+    <div id="caregiverModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop my-8 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-brand-500 text-white flex items-center justify-center">
+                        <i data-lucide="user-cog" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white" id="caregiverModalTitle">Caregiver Access</h3>
+                        <p class="text-xs text-slate-500">Manage the patient’s doses securely</p>
+                    </div>
+                </div>
+                <button onclick="App.cancelCaregiver()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Logged-in caregiver card -->
+            <div id="caregiverLoggedIn" class="hidden">
+                <div class="p-4 rounded-2xl bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200/50 dark:border-violet-800/30">
+                    <p class="text-xs text-slate-500">Logged in as</p>
+                    <p id="caregiverSessionName" class="text-lg font-bold text-slate-900 dark:text-white">—</p>
+                    <p id="caregiverSessionEmail" class="text-xs text-slate-500">—</p>
+                </div>
+                <button onclick="CaregiverAuth.logout(); App.closeCaregiverModal(); App.showToast('Logged out of caregiver access.', 'info')" class="mt-3 w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 transition">Log Out</button>
+            </div>
+
+            <!-- Login / Register forms -->
+            <div id="caregiverForms">
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button onclick="App.toggleCaregiverMode('login')" id="cgModeLoginBtn" class="px-3 py-2 rounded-xl text-xs font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">Log In</button>
+                    <button onclick="App.toggleCaregiverMode('register')" id="cgModeRegisterBtn" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">Register</button>
+                </div>
+
+                <!-- Login -->
+                <form id="cgLoginForm" class="space-y-4" onsubmit="App.submitCaregiverLogin(event)">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Caregiver Email</label>
+                        <input type="email" id="cgLoginEmail" placeholder="caregiver@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+                        <input type="password" id="cgLoginPassword" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <p id="cgLoginError" class="hidden text-xs font-semibold text-rose-600 dark:text-rose-400"></p>
+                    <button type="submit" class="w-full bg-gradient-to-r from-violet-600 to-brand-600 hover:from-violet-700 hover:to-brand-700 text-white text-sm font-bold px-4 py-3 rounded-xl shadow-lg shadow-brand-600/20 transition">Log In</button>
+                </form>
+
+                <!-- Register -->
+                <form id="cgRegisterForm" class="space-y-4 hidden" onsubmit="App.submitCaregiverRegister(event)">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Caregiver Name</label>
+                        <input type="text" id="cgRegName" placeholder="e.g. Mary Peterson" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Caregiver Email</label>
+                        <input type="email" id="cgRegEmail" placeholder="caregiver@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
+                        <input type="password" id="cgRegPassword" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <label class="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="cgRegConsent" class="mt-0.5 w-4 h-4 rounded accent-violet-600">
+                        <span>I confirm the patient has given their <strong>consent</strong> for me to manage their medicines and mark their doses on their behalf.</span>
+                    </label>
+                    <p id="cgRegisterError" class="hidden text-xs font-semibold text-rose-600 dark:text-rose-400"></p>
+                    <button type="submit" class="w-full bg-gradient-to-r from-violet-600 to-brand-600 hover:from-violet-700 hover:to-brand-700 text-white text-sm font-bold px-4 py-3 rounded-xl shadow-lg shadow-brand-600/20 transition">Create Caregiver Access</button>
+                </form>
+            </div>
+
+            <p class="text-[11px] text-slate-400 leading-relaxed">🔒 Passwords are stored as secure hashes only. Caregiver access is optional — patients can continue to use the app without logging in.</p>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Modules -->
+    <script src="js/precautions-data.js"></script>
+    <script src="js/expiry-engine.js"></script>
+    <script src="js/reminder-alarm.js"></script>
+    <script src="js/adherence.js"></script>
+    <script src="js/ocr-scanner.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/ai-reader.js"></script>
+    <script src="js/patients.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/lifestyle.js"></script>
+    <script src="js/recommendations.js"></script>
+    <script src="js/ai-doctor.js"></script>
+    <script src="js/caregivers.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
