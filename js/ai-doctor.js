@@ -101,19 +101,25 @@
         },
 
         // ---------------------------------------------------------------
-        // Gemini generation (base64 not needed — text prompt only)
+        // Serverless LLM (Gemini via /api/doctor — key lives in Vercel env)
+        // Returns { answer, source } where source is 'gemini' on success or
+        // 'local' when the backend has no key / is unreachable.
         // ---------------------------------------------------------------
-        async callGemini(prompt, apiKey) {
-            const endpoint =
-                'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
-            const resp = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            if (!resp.ok) throw new Error('Gemini HTTP ' + resp.status);
-            const data = await resp.json();
-            return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        async callDoctor(question, profile, history) {
+            try {
+                const resp = await fetch('/api/doctor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, profile, history: history || [] })
+                });
+                if (!resp.ok) return { answer: '', source: 'local' };
+                const data = await resp.json();
+                if (!data || !data.answer) return { answer: '', source: 'local' };
+                return { answer: data.answer, source: data.source || 'gemini' };
+            } catch (e) {
+                console.warn('AI Doctor API unreachable, using local knowledge:', e);
+                return { answer: '', source: 'local' };
+            }
         },
 
         // ---------------------------------------------------------------
@@ -122,7 +128,6 @@
         async answer(patientId, question) {
             const ctx = this.buildContext(patientId);
             const conflicts = this.detectConflicts(ctx);
-            const geminiKey = (window.Settings && Settings.getGeminiKey()) || '';
 
             if (!question.trim()) {
                 this.addMessage('assistant', 'Please type a health question so I can help you. 💙', '');
@@ -140,31 +145,15 @@
             // Build patient context string for the model
             const profileText = this.profileToText(ctx);
 
-            let answer = '';
-            let usedAI = false;
-            if (geminiKey) {
-                try {
-                    const prompt =
-                        'You are a compassionate, personalized AI doctor assistant for Ciphera Health+. ' +
-                        'Use this patient profile: ' + profileText + '\n\n' +
-                        'Answer the patient question in simple, clear, supportive language. ' +
-                        'Provide educational explanations only — do NOT diagnose. ' +
-                        'If the question involves a medicine that conflicts with the patient allergy list, warn clearly. ' +
-                        'Suggest safer alternatives where relevant. Remind them to consult their real doctor for decisions. ' +
-                        'Patient question: "' + question + '"';
-                    const geminiAnswer = await this.callGemini(prompt, geminiKey);
-                    if (geminiAnswer) {
-                        answer = geminiAnswer;
-                        usedAI = true;
-                    }
-                } catch (e) {
-                    console.warn('Gemini failed, using local knowledge:', e);
-                }
-            }
+            // Build conversation history (last several turns) for context
+            const history = this.getHistory(patientId).slice(-10).map(h => [
+                { role: 'user', content: h.question },
+                { role: 'assistant', content: h.answer.replace(/<[^>]+>/g, '') }
+            ]).flat();
 
-            if (!usedAI) {
-                answer = this.localAnswer(ctx, question, conflicts);
-            }
+            const res = await this.callDoctor(question, profileText, history);
+            const usedAI = res.source === 'gemini';
+            const answer = usedAI ? res.answer : this.localAnswer(ctx, question, conflicts);
 
             this.addMessage('assistant', answer, usedAI ? 'gemini' : 'local', warnings);
             this.addToHistory(ctx.patient ? ctx.patient.id : '', question, answer, warnings);
