@@ -1,0 +1,17 @@
+{
+  "name": "ciphera-health-plus",
+  "version": "1.0.0",
+  "description": "Ciphera Health+ — premium healthcare SPA with Vercel Postgres cloud sync",
+  "type": "module",
+  "scripts": {
+    "db:schema": "node api/db/schema.js apply",
+    "db:test": "node api/db/schema.js test"
+  },
+  "dependencies": {
+    "@vercel/node": "^4.0.0",
+    "pg": "^8.13.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
