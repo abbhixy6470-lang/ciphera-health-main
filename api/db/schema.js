@@ -22,6 +22,8 @@ try {
 
 const { Pool } = pg;
 
+// Every row is scoped to an `owner_key` (the device/patient bundle key) so the
+// app can sync one self-contained dataset. Logs/medicines keep their own id.
 const SCHEMA_UP = `
 CREATE TABLE IF NOT EXISTS caregivers (
   id           TEXT PRIMARY KEY,
@@ -35,18 +37,21 @@ CREATE TABLE IF NOT EXISTS caregivers (
 
 CREATE TABLE IF NOT EXISTS patients (
   id           TEXT PRIMARY KEY,
+  owner_key    TEXT NOT NULL,
   name         TEXT,
   age          TEXT,
   blood        TEXT,
   relation     TEXT DEFAULT 'Self',
   allergies    TEXT DEFAULT '',
-  conditions   TEXT DEFAULT '',
+  conditions    TEXT DEFAULT '',
   contact      TEXT DEFAULT '',
   created_at   BIGINT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_patients_owner ON patients (owner_key);
 
 CREATE TABLE IF NOT EXISTS medicines (
   id         TEXT PRIMARY KEY,
+  owner_key  TEXT NOT NULL,
   name       TEXT NOT NULL,
   generic    TEXT DEFAULT '',
   category   TEXT DEFAULT 'General / Other',
@@ -62,9 +67,11 @@ CREATE TABLE IF NOT EXISTS medicines (
   created_at BIGINT NOT NULL,
   updated_at BIGINT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_medicines_owner ON medicines (owner_key);
 
 CREATE TABLE IF NOT EXISTS dose_logs (
   id            TEXT PRIMARY KEY,
+  owner_key     TEXT NOT NULL,
   medicine_id   TEXT NOT NULL,
   date          TEXT NOT NULL,
   scheduled_time TEXT NOT NULL,
@@ -73,23 +80,25 @@ CREATE TABLE IF NOT EXISTS dose_logs (
   notes         TEXT DEFAULT '',
   actor         TEXT DEFAULT 'Patient'
 );
-
+CREATE INDEX IF NOT EXISTS idx_dose_logs_owner ON dose_logs (owner_key);
 CREATE INDEX IF NOT EXISTS idx_dose_logs_medicine ON dose_logs (medicine_id, date);
-CREATE INDEX IF NOT EXISTS idx_dose_logs_date ON dose_logs (date);
 
 CREATE TABLE IF NOT EXISTS app_settings (
-  key    TEXT PRIMARY KEY,
-  value  TEXT
+  owner_key TEXT NOT NULL,
+  key       TEXT NOT NULL,
+  value     TEXT,
+  PRIMARY KEY (owner_key, key)
 );
 
 CREATE TABLE IF NOT EXISTS doctor_history (
   id          TEXT PRIMARY KEY,
-  patient_id  TEXT DEFAULT '',
+  owner_key   TEXT NOT NULL,
   question    TEXT NOT NULL,
   answer      TEXT NOT NULL,
   warnings    JSONB DEFAULT '[]'::jsonb,
   ts          BIGINT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_doctor_history_owner ON doctor_history (owner_key);
 `;
 
 async function run() {
@@ -98,10 +107,7 @@ async function run() {
     console.error('No DATABASE_URL / POSTGRES_URL set. Provide it in .env first.');
     process.exit(1);
   }
-  const pool = new Pool({
-    connectionString: cs,
-    ssl: { rejectUnauthorized: false }
-  });
+  const pool = new Pool({ connectionString: cs, ssl: { rejectUnauthorized: false } });
   try {
     await pool.query(SCHEMA_UP);
     console.log('✓ Schema applied successfully.');
