@@ -49,7 +49,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY || '';
   if (!apiKey) {
     // Not configured server-side — tell the client to use its local fallback.
-    return ok(res, { answer: '', source: 'local', error: 'config' });
+    return ok(res, { answer: '', source: 'local', error: 'config', hasKey: false, envPresent: ('GEMINI_API_KEY' in process.env) });
   }
 
   let body;
