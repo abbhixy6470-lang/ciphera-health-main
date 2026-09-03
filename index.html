@@ -156,6 +156,12 @@
                 <i data-lucide="lock" class="w-3.5 h-3.5"></i>
                 <span>100% client-side • Your health data stays private</span>
             </div>
+
+            <!-- Optional account (not required to enter) -->
+            <button id="authSplashBtn" onclick="Auth.openModal()" class="mx-auto mt-3 flex items-center gap-2 text-xs font-semibold text-white/50 hover:text-white transition-colors duration-200 splash-section">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                <span>Login or Register (optional) — sync across devices</span>
+            </button>
         </div>
     </div>
 
@@ -206,6 +212,12 @@
                     <!-- Theme Toggle -->
                     <button onclick="App.toggleTheme()" title="Toggle Theme" class="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all duration-200">
                         <i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Optional Login / Register Button -->
+                    <button id="authNavBtn" onclick="Auth.openModal()" title="Optional: link your health data to an account" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-slate-600 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/80 hover:text-brand-600 dark:hover:text-brand-400 transition-all duration-200">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Login / Register</span>
                     </button>
 
                     <!-- Add Medicine Button (Desktop) -->
@@ -1677,6 +1689,92 @@
     </div>
 
     <!-- ========================================================================= -->
+    <!-- MODAL: OPTIONAL LOGIN / REGISTRATION -->
+    <!-- ========================================================================= -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop space-y-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-teal-500 text-white flex items-center justify-center">
+                        <i data-lucide="shield-user" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Your Account</h3>
+                        <p class="text-xs text-slate-500">Optional — link &amp; sync health data across devices</p>
+                    </div>
+                </div>
+                <button onclick="Auth.closeModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Signed-out state -->
+            <div id="authGuestState">
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+                    You can use Health+ right now without an account — your data stays private on this device.
+                    Creating an account lets you sign in on any device and keep your medicines, schedules, records and family care in sync.
+                </p>
+                <div class="flex border-b border-slate-200 dark:border-slate-700 mb-4">
+                    <button id="authTabLogin" onclick="Auth.switchForm('login')" class="flex-1 pb-2 text-sm font-bold text-brand-600 dark:text-brand-400 border-b-2 border-brand-600 dark:border-brand-400">Login</button>
+                    <button id="authTabRegister" onclick="Auth.switchForm('register')" class="flex-1 pb-2 text-sm font-bold text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 border-b-2 border-transparent">Register</button>
+                </div>
+
+                <!-- Login form -->
+                <form id="authLoginForm" onsubmit="return Auth.login(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                        <input id="authLoginEmail" type="email" required placeholder="you@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+                        <input id="authLoginPass" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <button id="authLoginBtn" type="submit" class="w-full bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold px-4 py-3 rounded-xl shadow-lg shadow-brand-600/20 transition">
+                        <i data-lucide="log-in" class="w-4 h-4 inline -mt-0.5"></i> Log In
+                    </button>
+                    <p class="text-[11px] text-slate-400 text-center">No account yet? <button type="button" onclick="Auth.switchForm('register')" class="text-brand-600 dark:text-brand-400 font-semibold">Register free</button></p>
+                </form>
+
+                <!-- Register form -->
+                <form id="authRegisterForm" onsubmit="return Auth.register(event)" class="space-y-3 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Name <span class="text-slate-400">(optional)</span></label>
+                        <input id="authName" type="text" placeholder="Your name" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                        <input id="authRegEmail" type="email" required placeholder="you@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Password <span class="text-slate-400">(min 6 characters)</span></label>
+                        <input id="authRegPass" type="password" required placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <button id="authRegBtn" type="submit" class="w-full bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold px-4 py-3 rounded-xl shadow-lg shadow-brand-600/20 transition">
+                        <i data-lucide="user-plus" class="w-4 h-4 inline -mt-0.5"></i> Create Account
+                    </button>
+                    <p class="text-[11px] text-slate-400 text-center">Already have an account? <button type="button" onclick="Auth.switchForm('login')" class="text-brand-600 dark:text-brand-400 font-semibold">Log in</button></p>
+                </form>
+            </div>
+
+            <!-- Signed-in state -->
+            <div id="authAccountState" class="hidden">
+                <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-100 dark:bg-slate-800">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center">
+                        <i data-lucide="user-check" class="w-5 h-5"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p id="authAccountInfo" class="text-sm font-bold text-slate-900 dark:text-white truncate">Signed in</p>
+                        <p class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Synced to your account across devices</p>
+                    </div>
+                </div>
+                <button onclick="Auth.signOut()" class="w-full mt-4 px-4 py-3 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-sm font-bold hover:bg-rose-100 dark:hover:bg-rose-900/50 transition">
+                    <i data-lucide="log-out" class="w-4 h-4 inline -mt-0.5"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
     <!-- MODAL 8: MEDICAL RECORD VAULT (ADD / EDIT / VIEW) -->
     <!-- ========================================================================= -->
     <div id="vaultModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
@@ -1764,6 +1862,7 @@
     <script src="js/settings.js"></script>
     <script src="js/ai-reader.js"></script>
     <script src="js/patients.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/cloud-sync.js"></script>
     <script src="js/analytics.js"></script>
     <script src="js/lifestyle.js"></script>

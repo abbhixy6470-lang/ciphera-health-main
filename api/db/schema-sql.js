@@ -84,6 +84,16 @@ CREATE TABLE IF NOT EXISTS medical_records (
 );
 CREATE INDEX IF NOT EXISTS idx_medical_records_owner ON medical_records (owner_key);
 
+CREATE TABLE IF NOT EXISTS accounts (
+  id         TEXT PRIMARY KEY,
+  email      TEXT NOT NULL UNIQUE,
+  name       TEXT DEFAULT '',
+  password_hash TEXT NOT NULL,
+  owner_key  TEXT NOT NULL UNIQUE,
+  created_at BIGINT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_accounts_email ON accounts (email);
+
 CREATE TABLE IF NOT EXISTS wearable_metrics (
   id          TEXT PRIMARY KEY,
   owner_key   TEXT NOT NULL,

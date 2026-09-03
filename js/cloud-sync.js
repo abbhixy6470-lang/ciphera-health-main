@@ -28,7 +28,14 @@
     };
 
     // ── device / profile key ─────────────────────────────────────────────
+    // When the user has opted into an account, sync under the account's stable
+    // owner key so health data follows them across devices. Anonymous users
+    // (the default) keep the random per-device key.
     function deviceKey() {
+        if (typeof window.Auth !== 'undefined' && Auth.syncKey) {
+            const accountKey = Auth.syncKey();
+            if (accountKey) return accountKey;
+        }
         let k = localStorage.getItem(CONFIG.deviceKeyStorage);
         if (!k) {
             k = 'dev_' + (crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
