@@ -1,4 +1,5 @@
 // POST /api/auth — optional Login / Registration for Ciphera Health+.
+// v2 — force function redeploy.
 //
 // Login is NOT required to use the app (anonymous device-key sync still
 // works). Registering an account gives the user a stable `owner_key` so their
