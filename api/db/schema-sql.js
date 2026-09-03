@@ -83,6 +83,21 @@ CREATE TABLE IF NOT EXISTS medical_records (
   updated_at  BIGINT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_medical_records_owner ON medical_records (owner_key);
+
+CREATE TABLE IF NOT EXISTS wearable_metrics (
+  id          TEXT PRIMARY KEY,
+  owner_key   TEXT NOT NULL,
+  source      TEXT DEFAULT 'manual',
+  device_name TEXT DEFAULT '',
+  metric      TEXT NOT NULL,
+  value       DOUBLE PRECISION,
+  unit        TEXT DEFAULT '',
+  reading_time BIGINT NOT NULL,
+  meta        JSONB DEFAULT '{}'::jsonb,
+  created_at  BIGINT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_wearable_metrics_owner ON wearable_metrics (owner_key);
+CREATE INDEX IF NOT EXISTS idx_wearable_metrics_type ON wearable_metrics (owner_key, metric, reading_time);
 `;
 
 let ensuring = false;

@@ -7,8 +7,8 @@
 // Uses a lightweight owner key (in Authorization header or ?key=) derived
 // from the device, so no heavy account ceremony is required.
 
-import { query } from '../db/client.js';
-import { corsHeaders, sendOptions, ok, err, uid, now } from '../db/helpers.js';
+import { query } from './db/client.js';
+import { corsHeaders, sendOptions, ok, err, uid, now } from './db/helpers.js';
 
 // The owner_key scopes each device's dataset. Accept it in the Authorization
 // header (Bearer) or as a ?key= query parameter.
@@ -59,7 +59,13 @@ const LOG = ['date','scheduled_time','status','timestamp','notes','actor'];
 const HIS = ['question','answer','warnings','ts'];
 
 async function loadBundle(key) {
-  const patients = (await query('SELECT * FROM patients WHERE owner_key = $1 ORDER BY created_at', [key])).rows.map(r => pick(r, PAT));
+  // Keep the patient ID in the response.  The browser uses it to associate
+  // recommendations, AI-doctor history, and vault records with a family member.
+  const patients = (await query('SELECT * FROM patients WHERE owner_key = $1 ORDER BY created_at', [key])).rows.map(r => ({
+    id: r.id,
+    ...pick(r, PAT),
+    createdAt: r.created_at
+  }));
   const medicines = (await query('SELECT * FROM medicines WHERE owner_key = $1 ORDER BY created_at', [key])).rows.map(r => ({ id: r.id, ...pick(r, MED), schedule: r.schedule }));
   const logRows = (await query('SELECT * FROM dose_logs WHERE owner_key = $1 ORDER BY timestamp', [key])).rows;
   const logs = logRows.map(r => ({ id: r.id, medicine_id: r.medicine_id, ...pick(r, LOG) }));
@@ -72,7 +78,11 @@ async function loadBundle(key) {
     facility: r.facility, doctor: r.doctor, resultSummary: r.result_summary, notes: r.notes,
     fields: r.fields, createdAt: r.created_at, updatedAt: r.updated_at
   }));
-  return { key, patients, medicines, logs, settings, doctorHistory: history, records };
+  const metrics = (await query('SELECT * FROM wearable_metrics WHERE owner_key = $1 ORDER BY reading_time DESC LIMIT 2000', [key])).rows.map(r => ({
+    id: r.id, source: r.source, deviceName: r.device_name, metric: r.metric,
+    value: r.value, unit: r.unit, readingTime: r.reading_time, meta: r.meta, createdAt: r.created_at
+  }));
+  return { key, patients, medicines, logs, settings, doctorHistory: history, records, wearableMetrics: metrics };
 }
 
 function pick(row, fields) {
@@ -151,6 +161,19 @@ async function saveBundle(key, body) {
       [r.id || uid('rec'), key, r.title, r.type || 'Report', r.recordDate || '',
        r.patientId || '', r.facility || '', r.doctor || '', r.resultSummary || '', r.notes || '',
        JSON.stringify(Array.isArray(r.fields) ? r.fields : []), Number(r.createdAt) || ts]
+    );
+  }
+
+  const wearable = Array.isArray(body.wearableMetrics) ? body.wearableMetrics : [];
+  await query('DELETE FROM wearable_metrics WHERE owner_key = $1', [key]);
+  for (const w of wearable) {
+    if (!w.metric) continue;
+    await query(
+      `INSERT INTO wearable_metrics (id,owner_key,source,device_name,metric,value,unit,reading_time,meta,created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)`,
+      [w.id || uid('w'), key, w.source || 'manual', w.deviceName || '',
+       w.metric, Number(w.value) ?? null, w.unit || '', Number(w.readingTime) || ts,
+       JSON.stringify(w.meta && typeof w.meta === 'object' ? w.meta : {}), ts]
     );
   }
 

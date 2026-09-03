@@ -109,6 +109,8 @@ const App = {
         if (tabId === 'recommendations') this.renderRecommendations();
         if (tabId === 'ai-doctor') this.renderAIDoctor();
         if (tabId === 'vault') { if (window.Vault) Vault.render(); }
+        if (tabId === 'wearable') { if (window.Wearable) Wearable.render(); }
+        if (tabId === 'scanner' && window.Settings) Settings.syncGeminiStatusBadge();
 
         lucide.createIcons();
     },
@@ -716,6 +718,8 @@ const App = {
         document.getElementById('ocrRawTextOutput').textContent = 'No text scanned yet.';
         document.getElementById('btnAutoFillMedicine').disabled = true;
         document.getElementById('ocrExpiryStatusBadge').classList.add('hidden');
+        const engineBadge = document.getElementById('ocrEngineBadge');
+        if (engineBadge) engineBadge.classList.add('hidden');
     },
 
     async runOCR(imageSrc) {
@@ -728,17 +732,63 @@ const App = {
         progressPercent.textContent = '0%';
 
         try {
-            const result = await OCRScanner.scanImage(imageSrc, (progress) => {
-                progressBar.style.width = `${progress}%`;
-                progressPercent.textContent = `${progress}%`;
-            });
+            let result = null;
+            let rawText = '';
+
+            // 1) OCR the image locally (best-effort). If Tesseract is unavailable,
+            //    we can still use AI to read the package directly.
+            try {
+                result = await OCRScanner.scanImage(imageSrc, (progress) => {
+                    progressBar.style.width = `${progress}%`;
+                    progressPercent.textContent = `${progress}%`;
+                });
+                rawText = (result && result.rawText) || '';
+            } catch (err) {
+                console.warn('Tesseract OCR unavailable:', err);
+                rawText = '';
+            }
 
             // Populate extracted fields
-            const extracted = result.extracted;
+            let extracted = (result && result.extracted) || { expiryDate: null, mfgDate: null, batchNo: null };
+            let usedAI = false;
+            let aiDosageForm = 'Tablet';
+            let usedTesseract = !!rawText;
+
+            // AI-enhanced extraction (Gemini) when a key is configured
+            if (typeof OCRScanner.aiExtractDetails === 'function' && window.Settings && Settings.getGeminiKey()) {
+                progressBar.style.width = '90%';
+                progressPercent.textContent = '90%';
+                try {
+                    const ai = await OCRScanner.aiExtractDetails(imageSrc, rawText);
+                    if (ai && ai.ai) {
+                        usedAI = true;
+                        aiDosageForm = ai.dosageForm || aiDosageForm;
+                        extracted = {
+                            expiryDate: ai.expiryDate || extracted.expiryDate || null,
+                            mfgDate: ai.mfgDate || extracted.mfgDate || null,
+                            batchNo: ai.batchNo || extracted.batchNo || null,
+                            matchedMedicine: null,
+                            matchedName: ai.medicine || null,
+                            matchedCategory: ai.category || null,
+                        };
+                    }
+                } catch (e) {
+                    console.warn('AI extraction failed, using regex fallback:', e);
+                }
+            }
+
             document.getElementById('ocrExtractedExpiry').value = extracted.expiryDate || 'Not detected (select manually)';
             document.getElementById('ocrExtractedBatch').value = extracted.batchNo || 'Not detected';
             document.getElementById('ocrExtractedMfg').value = extracted.mfgDate || 'Not detected';
-            document.getElementById('ocrRawTextOutput').textContent = result.rawText || 'No text extracted.';
+            document.getElementById('ocrRawTextOutput').textContent = rawText || 'No text extracted.';
+
+            // Track medicine name + category for AI prefill (kept in memory for transfer)
+            this._ocrScan = {
+                medicine: extracted.matchedName || null,
+                category: extracted.matchedCategory || null,
+                dosageForm: aiDosageForm,
+                usedAI: usedAI
+            };
 
             // Status badge on extracted expiry
             const badge = document.getElementById('ocrExpiryStatusBadge');
@@ -751,13 +801,45 @@ const App = {
                 badge.classList.add('hidden');
             }
 
+            // Engine badge (AI vs OCR)
+            const engineBadge = document.getElementById('ocrEngineBadge');
+            if (engineBadge) {
+                if (usedAI) {
+                    engineBadge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-violet-100 to-brand-100 text-violet-700 dark:from-violet-900/60 dark:to-brand-900/60 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/40';
+                    engineBadge.innerHTML = '<i data-lucide="sparkles" class="w-3 h-3 inline-block mr-1"></i>Gemini AI';
+                } else if (usedTesseract) {
+                    engineBadge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border border-teal-200/60 dark:border-teal-800/40';
+                    engineBadge.innerHTML = '<i data-lucide="scan" class="w-3 h-3 inline-block mr-1"></i>OCR';
+                } else {
+                    engineBadge.classList.add('hidden');
+                }
+                engineBadge.classList.remove('hidden');
+            }
+
             document.getElementById('btnAutoFillMedicine').disabled = false;
-            this.showToast('🔍 Text & Expiry parsed successfully!', 'success');
+
+            let toastMsg;
+            if (usedAI) {
+                toastMsg = '🤖 AI extracted package details successfully!';
+            } else if (usedTesseract) {
+                toastMsg = '🔍 Text & Expiry parsed successfully!';
+            } else {
+                toastMsg = 'Tesseract OCR unavailable. Connect Gemini AI in settings to enable scanning without an internet OCR engine.';
+            }
+            if (usedAI || usedTesseract) {
+                this.showToast(toastMsg, 'success');
+            } else {
+                this.showToast(toastMsg, 'warning');
+            }
         } catch (err) {
             console.error(err);
             this.showToast(err.message || 'Error running OCR scanner', 'error');
         } finally {
-            progressContainer.classList.add('hidden');
+            progressBar.style.width = '100%';
+            progressPercent.textContent = '100%';
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+            }, 500);
             lucide.createIcons();
         }
     },
@@ -803,6 +885,7 @@ const App = {
     transferOcrToAddModal() {
         const expiry = document.getElementById('ocrExtractedExpiry').value;
         const batch = document.getElementById('ocrExtractedBatch').value;
+        const mfg = document.getElementById('ocrExtractedMfg').value;
 
         this.openAddMedicineModal();
 
@@ -811,6 +894,28 @@ const App = {
         }
         if (batch && batch !== 'Not detected') {
             document.getElementById('medFormBatch').value = batch;
+        }
+        if (mfg && mfg !== 'Not detected') {
+            document.getElementById('medFormNotes').value = 'Mfg Date: ' + mfg;
+        }
+
+        // Prefill medicine name / category / dosage form from AI scan (if available)
+        if (this._ocrScan) {
+            if (this._ocrScan.medicine) {
+                document.getElementById('medFormName').value = this._ocrScan.medicine;
+            }
+            if (this._ocrScan.category) {
+                const catEl = document.getElementById('medFormCategory');
+                if (catEl && [...catEl.options].some(o => o.value === this._ocrScan.category)) {
+                    catEl.value = this._ocrScan.category;
+                }
+            }
+            if (this._ocrScan.dosageForm) {
+                const formEl = document.getElementById('medFormDosageForm');
+                if (formEl && [...formEl.options].some(o => o.value === this._ocrScan.dosageForm)) {
+                    formEl.value = this._ocrScan.dosageForm;
+                }
+            }
         }
     },
 

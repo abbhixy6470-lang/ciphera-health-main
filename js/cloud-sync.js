@@ -21,7 +21,9 @@
             'medguard_settings',
             'ciphera_patients',
             'ciphera_doctor_history',
-            'ciphera_medical_records'
+            'ciphera_medical_records',
+            'ciphera_wearable_metrics',
+            'ciphera_wearable_devices'
         ]
     };
 
@@ -66,7 +68,20 @@
         return { id: p.id, name: p.name || '', age: p.age, blood: p.blood, relation: p.relation || 'Self', allergies: p.allergies || '', conditions: p.conditions || '', contact: p.contact || '' };
     }
     function patientFromApi(r) {
-        return { id: r.id, name: r.name, age: r.age, blood: r.blood, relation: r.relation || 'Self', allergies: r.allergies || '', conditions: r.conditions || '', contact: r.contact || '', createdAt: Date.now() };
+        return {
+            // Older saved bundles may not have an ID.  Give those profiles a
+            // stable local ID so they remain selectable instead of collapsing
+            // into an empty option in the family-care views.
+            id: r.id || 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+            name: r.name,
+            age: r.age,
+            blood: r.blood,
+            relation: r.relation || 'Self',
+            allergies: r.allergies || '',
+            conditions: r.conditions || '',
+            contact: r.contact || '',
+            createdAt: r.createdAt || r.created_at || Date.now()
+        };
     }
 
     function historyToApi(h) {
@@ -103,7 +118,8 @@
         const patients = (window.Care && Care.getAll() || []).map(patientToApi);
         const doctorHistory = JSON.parse(localStorage.getItem('ciphera_doctor_history') || '[]').map(historyToApi);
         const records = JSON.parse(localStorage.getItem('ciphera_medical_records') || '[]').map(recordToApi);
-        return { medicines, logs, settings, patients, doctorHistory, records };
+        const wearableMetrics = JSON.parse(localStorage.getItem('ciphera_wearable_metrics') || '[]');
+        return { medicines, logs, settings, patients, doctorHistory, records, wearableMetrics };
     }
 
     function applyServerBundle(bundle) {
@@ -124,6 +140,9 @@
         }
         if (bundle.records && Array.isArray(bundle.records)) {
             localStorage.setItem('ciphera_medical_records', JSON.stringify(bundle.records.map(recordFromApi)));
+        }
+        if (bundle.wearableMetrics && Array.isArray(bundle.wearableMetrics)) {
+            localStorage.setItem('ciphera_wearable_metrics', JSON.stringify(bundle.wearableMetrics));
         }
     }
 

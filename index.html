@@ -265,6 +265,11 @@
                         <i data-lucide="archive" class="w-4 h-4"></i>
                         <span>Medical Vault</span>
                     </button>
+                    <button onclick="App.switchTab('wearable')" id="tabBtn-wearable" class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80">
+                        <i data-lucide="watch" class="w-4 h-4"></i>
+                        <span>Wearables</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-gradient-to-r from-violet-100 to-brand-100 text-violet-700 dark:from-violet-900/60 dark:to-brand-900/60 dark:text-violet-300">NEW</span>
+                    </button>
                 </nav>
             </div>
         </div>
@@ -580,12 +585,16 @@
             <div class="glass-card p-6 rounded-2xl shadow-sm">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 mb-2">
-                        <i data-lucide="scan" class="w-3.5 h-3.5"></i> Client-Side OCR Engine
+                        <i data-lucide="scan" class="w-3.5 h-3.5"></i> Client-Side OCR + AI Engine
                     </div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Smart Medicine Strip & Box Scanner</h2>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                        Take a photo or upload an image of your medicine strip, blister pack, or carton. Our smart OCR reader extracts the <strong>Expiry Date (EXP)</strong>, <strong>Batch / Lot #</strong>, and <strong>Manufacturing Date (MFG)</strong> automatically!
+                        Take a photo or upload an image of your medicine strip, blister pack, or carton. Our smart OCR reader extracts the <strong>Expiry Date (EXP)</strong>, <strong>Batch / Lot #</strong>, and <strong>Manufacturing Date (MFG)</strong> automatically — supercharged by <strong class="text-violet-600 dark:text-violet-300">Gemini AI</strong> for messy or printed drug packaging.
                     </p>
+                    <button id="scanAiStatus" onclick="App.openGeminiSettings()" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span id="scanAiStatusText">AI: Not Set</span>
+                    </button>
                 </div>
             </div>
 
@@ -664,10 +673,13 @@
 
                 <!-- Right: OCR Extraction Results & Form Pre-fill Card -->
                 <div class="glass-card p-6 rounded-2xl shadow-sm space-y-4">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-teal-500"></i>
-                        <span>Extracted Medicine Details</span>
-                    </h3>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-teal-500"></i>
+                            <span>Extracted Medicine Details</span>
+                        </h3>
+                        <span id="ocrEngineBadge" class="hidden px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"></span>
+                    </div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Parsed dates and batch information from your package</p>
 
                     <!-- Extracted Result Fields -->
@@ -1125,7 +1137,138 @@
 
 
 
+        <!-- ========================================================================= -->
+        <!-- TAB: WEARABLES & SMART DEVICE INTEGRATION -->
+        <!-- ========================================================================= -->
+        <div id="view-wearable" class="tab-pane hidden space-y-6">
+
+            <!-- Hero -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-56 h-56 bg-gradient-to-bl from-violet-500/10 to-brand-500/5 rounded-full -mr-24 -mt-24"></div>
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide bg-gradient-to-r from-violet-100 to-brand-100 text-violet-700 dark:from-violet-900/50 dark:to-brand-900/30 dark:text-violet-300 mb-2 border border-violet-200/60 dark:border-violet-800/40">
+                            <i data-lucide="watch" class="w-3.5 h-3.5"></i> Smart Wearable Integration
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Wearable Health Sync</h2>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-3xl leading-relaxed">
+                            Sync heart rate, blood oxygen, glucose, and sleep data from your smartwatch or fitness band. Readings are paired with your medication adherence to detect potential health risks.
+                        </p>
+                    </div>
+                    <button onclick="Wearable.openManualEntry()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-semibold flex items-center gap-2 shrink-0 transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Manual Reading</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Device Connection Area -->
+            <div class="glass-card rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center gap-2">
+                    <i data-lucide="bluetooth" class="w-4 h-4 text-violet-500"></i>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Connected Devices</h3>
+                </div>
+                <div id="wearableConnection">
+                    <!-- Populated by Wearable.renderConnection() -->
+                </div>
+            </div>
+
+            <!-- Latest Vital Readings Cards -->
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-rose-500"></i>
+                        <span>Latest Vitals Snapshot</span>
+                    </h3>
+                    <button onclick="Wearable.render()" class="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+                    </button>
+                </div>
+                <div id="wearableReadings" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Populated by Wearable.renderLatestReadings() -->
+                </div>
+            </div>
+
+            <!-- Risk Analysis + History Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left 2 cols: Risk Analysis -->
+                <div class="lg:col-span-2">
+                    <div class="glass-card p-6 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-500"></i>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Vitals + Adherence Risk Analysis</h3>
+                        </div>
+                        <div id="wearableRisk">
+                            <!-- Populated by Wearable.renderRisk() -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 1 col: Reading History -->
+                <div>
+                    <div class="glass-card p-6 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i data-lucide="history" class="w-4 h-4 text-slate-500"></i>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">Reading History</h3>
+                        </div>
+                        <div id="wearableHistory" class="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                            <!-- Populated by Wearable.renderHistory() -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
+
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: WEARABLE MANUAL ENTRY -->
+    <!-- ========================================================================= -->
+    <div id="wearableManualModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 animate-pop space-y-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-violet-500 text-white flex items-center justify-center">
+                        <i data-lucide="heart-pulse" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Manual Vital Entry</h3>
+                        <p class="text-xs text-slate-500">Record a reading from any device</p>
+                    </div>
+                </div>
+                <button onclick="Wearable.closeManualEntry()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Metric Type</label>
+                <select id="wmMetric" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+                    <option value="heart_rate">Heart Rate (bpm)</option>
+                    <option value="resting_heart">Resting Heart Rate (bpm)</option>
+                    <option value="glucose">Blood Glucose (mg/dL)</option>
+                    <option value="spo2">Blood Oxygen SpO2 (%)</option>
+                    <option value="systolic_bp">Systolic Blood Pressure (mmHg)</option>
+                    <option value="diastolic_bp">Diastolic Blood Pressure (mmHg)</option>
+                    <option value="sleep_hours">Sleep Duration (hours)</option>
+                    <option value="steps">Steps Count</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Value</label>
+                <input type="number" id="wmValue" step="any" placeholder="e.g. 72" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border-none text-sm text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-brand-500">
+            </div>
+
+            <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800">
+                <button onclick="Wearable.closeManualEntry()" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 transition">Cancel</button>
+                <button onclick="Wearable.addManualReading()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-violet-600 hover:from-rose-700 hover:to-violet-700 text-white text-sm font-bold shadow-lg shadow-rose-600/20 transition flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-4 h-4"></i> Save Reading
+                </button>
+            </div>
+        </div>
+    </div>
 
 
     <!-- ========================================================================= -->
@@ -1475,6 +1618,7 @@
                             <option value="Parent">Parent</option>
                             <option value="Child">Child</option>
                             <option value="Grandparent">Grandparent</option>
+                            <option value="Grandchild">Grandchild</option>
                             <option value="Sibling">Sibling</option>
                             <option value="Other">Other</option>
                         </select>
@@ -1626,6 +1770,7 @@
     <script src="js/recommendations.js"></script>
     <script src="js/ai-doctor.js"></script>
     <script src="js/vault.js"></script>
+    <script src="js/wearable.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

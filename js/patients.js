@@ -15,6 +15,13 @@
             localStorage.setItem(STORE_KEY, JSON.stringify(patients));
         },
 
+        persist(patients) {
+            this.save(patients);
+            // Save immediately in the browser and request a cloud sync when
+            // the deployed API is available. The app remains usable offline.
+            if (window.CloudSync) CloudSync.schedulePush(600);
+        },
+
         init() {
             const seeded = this.getAll();
             if (seeded.length === 0) {
@@ -147,7 +154,7 @@
                 patients.push(data);
             }
 
-            this.save(patients);
+            this.persist(patients);
             this.render();
             this.closePatientModal();
             App.showToast(id ? '✅ Patient updated!' : '✅ Patient profile created!', 'success');
@@ -156,7 +163,7 @@
         deletePatient(id) {
             if (!confirm('Delete this patient profile?')) return;
             const patients = this.getAll().filter(x => x.id !== id);
-            this.save(patients);
+            this.persist(patients);
             this.render();
             App.showToast('Patient profile deleted.', 'info');
         },

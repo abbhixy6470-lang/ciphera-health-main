@@ -208,6 +208,65 @@ const OCRScanner = {
     },
 
     /**
+     * AI (Gemini) extraction engine — used when a Gemini API key is configured.
+     * Reads the package image (plus OCR raw text) to pull Expiry / Batch / Mfg / Medicine.
+     */
+    async aiExtractDetails(imageDataUrl, rawText) {
+        if (!window.Settings || !Settings.getGeminiKey()) {
+            return { ai: false, error: 'No Gemini key' };
+        }
+
+        const apiKey = Settings.getGeminiKey();
+        const base64 = String(imageDataUrl || '').split(',')[1] || imageDataUrl || '';
+
+        const endpoint =
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
+
+        const body = {
+            contents: [{
+                parts: [
+                    { inline_data: { mime_type: this.detectMime(imageDataUrl), data: base64 } },
+                    { text: 'You are a clinical pharmacist reading the printed EXPIRY / MANUFACTURING / BATCH information on a medicine package (foil, blister, carton, or bottle). ' +
+                        'OCR raw text (may be messy or empty): "' + String(rawText || '') + '". ' +
+                        'Return STRICT JSON only, no markdown, no extra text, with this schema: ' +
+                        '{"medicine":"medicine or brand name","category":"one of: Antibiotics, Ophthalmic (Eye Drops), Cardiovascular / Blood Pressure, Antidiabetic / Insulin, Pain Relievers & NSAIDs, Respiratory & Inhalers, Liquid Suspensions & Syrups, Topical Creams & Ointments, Vitamins & Supplements, General / Other",' +
+                        '"expiryDate":"YYYY-MM-DD or null","batchNo":"string or null","mfgDate":"YYYY-MM-DD or null",' +
+                        '"dosageForm":"one of: Tablet, Capsule, Eye Drops, Oral Suspension / Syrup, Injection / Pen, Inhaler, Ointment / Cream, Softgel, Other"} ' +
+                        'Use null when a value is not clearly visible. Prefer the most legible date on the package for expiry; do not guess a date that is not printed.' }
+                ]
+            }]
+        };
+
+        const resp = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (!resp.ok) throw new Error('Gemini HTTP ' + resp.status);
+
+        const data = await resp.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const start = cleaned.indexOf('{');
+        const end = cleaned.lastIndexOf('}');
+        if (start === -1 || end === -1) throw new Error('No JSON in AI response');
+
+        let parsed = JSON.parse(cleaned.slice(start, end + 1));
+
+        // Normalize dates to YYYY-MM-DD where possible
+        if (parsed.expiryDate) parsed.expiryDate = this.normalizeExtractedDate(String(parsed.expiryDate));
+        if (parsed.mfgDate) parsed.mfgDate = this.normalizeExtractedDate(String(parsed.mfgDate));
+
+        return { ai: true, ...parsed };
+    },
+
+    detectMime(dataUrl) {
+        const m = String(dataUrl || '').match(/^data:([^;,]+)/);
+        return (m && m[1]) || 'image/jpeg';
+    },
+
+    /**
      * Start live camera viewfinder
      */
     async startCamera(videoElement) {
